@@ -1,7 +1,5 @@
 <script>
-	import PageBody from "$lib/components/PageBody.svelte";
-
+  import PageBody from '$lib/components/PageBody.svelte';
 </script>
-<PageBody title="Collections">
-    a
-</PageBody>
+
+<PageBody title="Collections">a</PageBody>
