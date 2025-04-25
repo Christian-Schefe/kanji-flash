@@ -1,5 +1,138 @@
 <script lang="ts">
   import PageBody from '$lib/components/PageBody.svelte';
+  import { Pagination, Select } from 'flowbite-svelte';
+  import type { PageProps } from './$types';
+  import Filter from './Filter.svelte';
+  import { base } from '$app/paths';
+  import { page } from '$app/state';
+  import { goto } from '$app/navigation';
+
+  const { data }: PageProps = $props();
+  const { kanjis } = data;
+
+  let divWidth = $state(-1);
+  let pageIndex = $derived((Number(page.url.searchParams.get('page')) ?? 1) - 1);
+
+  const elementSize = 50;
+  const elementMargin = 8;
+
+  const columns = $derived(Math.floor(divWidth / elementSize));
+  const gridWidth = $derived(columns * elementSize);
+
+  let searchTerm = $state('');
+  let gradeFilter = $state('all');
+  let sortBy = $state('literal');
+  let reverse = $state(false);
+  let elementsPerPage = $state(100);
+
+  const gradeMap = new Map<string, (i: number | null) => boolean>([
+    ['kyouiku', (i) => i != null && [1, 2, 3, 4].includes(i)],
+    ['jouyou', (i) => i != null && [1, 2, 3, 4, 5, 6, 7, 8].includes(i)],
+    ['jinmeiyou', (i) => i != null && [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].includes(i)]
+  ]);
+
+  const gradeFilterFunc = $derived(gradeMap.get(gradeFilter) || (() => true));
+
+  const sortedKanjis = $derived(
+    kanjis.toSorted((a, b) => {
+      if (reverse) {
+        [a, b] = [b, a];
+      }
+      const tiebreaker = a.literal.localeCompare(b.literal);
+      switch (sortBy) {
+        case 'literal':
+          return tiebreaker;
+        case 'frequency':
+          return (a.frequency ?? Infinity) - (b.frequency ?? Infinity) || tiebreaker;
+        case 'grade':
+          return (a.grade ?? Infinity) - (b.grade ?? Infinity) || tiebreaker;
+        case 'jlpt':
+          return (b.jlpt ?? 0) - (a.jlpt ?? 0) || tiebreaker;
+        case 'strokes':
+          return (a.strokes ?? 0) - (b.strokes ?? 0) || tiebreaker;
+        default:
+          return tiebreaker;
+      }
+    })
+  );
+
+  const filteredKanjis = $derived(
+    sortedKanjis.filter((kanji) => {
+      const search = searchTerm.toLowerCase();
+      return (
+        (kanji.literal.toLowerCase().includes(search) ||
+          kanji.meanings.some((meaning) => meaning.toLowerCase().includes(search))) &&
+        gradeFilterFunc(kanji.grade)
+      );
+    })
+  );
+
+  const pageKanjis = $derived(
+    filteredKanjis.slice(elementsPerPage * pageIndex, elementsPerPage * (pageIndex + 1))
+  );
+
+  const pageCount = $derived(Math.ceil(filteredKanjis.length / elementsPerPage));
+  const pageIndices = $derived.by(() => {
+    const arr = [pageIndex - 2, pageIndex - 1, pageIndex, pageIndex + 1, pageIndex + 2];
+    const offset =
+      arr[0] < 0
+        ? -arr[0]
+        : arr[arr.length - 1] >= pageCount
+          ? -(arr[arr.length - 1] - pageCount + 1)
+          : 0;
+    return arr.map((index) => index + offset).filter((index) => index >= 0 && index < pageCount);
+  });
+  const pages = $derived(
+    pageIndices.map((index) => ({
+      name: (index + 1).toString(),
+      active: index === pageIndex,
+      href: `${base}/reference?page=${index + 1}`
+    }))
+  );
+
+  $effect(() => {
+    const newPageIndex = Math.min(Math.max(pageIndex, 0), pageCount - 1);
+    if (newPageIndex !== pageIndex) {
+      pageIndex = newPageIndex;
+    }
+  });
+
+  const setPage = (i: number) => {
+    pageIndex = Math.min(Math.max(i, 0), pageCount - 1);
+    goto(`${base}/reference?page=${pageIndex + 1}`);
+  };
 </script>
 
-<PageBody title="Reference">a</PageBody>
+<PageBody title="Reference">
+  <Filter bind:searchTerm bind:gradeFilter bind:sortBy bind:reverse bind:elementsPerPage />
+  <div class="flex justify-center my-4 items-center gap-4">
+    <Pagination
+      {pages}
+      on:previous={() => setPage(pageIndex - 1)}
+      on:next={() => setPage(pageIndex + 1)}
+    />
+  </div>
+  <div class="w-full flex justify-center" bind:clientWidth={divWidth}>
+    {#if divWidth === -1}
+      <p>Loading...</p>
+    {:else}
+      <div
+        class="grid"
+        style="grid-template-columns: repeat({columns}, 1fr); width: {gridWidth}px;"
+      >
+        {#each pageKanjis as kanji}
+          <a
+            href="{base}/reference/{kanji.literal}"
+            style="width: {elementSize - elementMargin}px; height: {elementSize -
+              elementMargin}px; margin: {elementMargin / 2}px;
+              font-size: {elementSize / 1.5 - 10}px;
+              font-family: 'Noto Serif JP', sans-serif;"
+            class="p-1 outline outline-gray-300 rounded-lg text-center hover:outline-blue-400 active:bg-blue-100"
+          >
+            {kanji.literal}
+          </a>
+        {/each}
+      </div>
+    {/if}
+  </div>
+</PageBody>

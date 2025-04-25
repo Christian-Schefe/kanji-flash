@@ -1,6 +1,7 @@
 <script lang="ts">
   import { base } from '$app/paths';
-  const linkStyle = 'text-blue-500 hover:text-blue-700';
+  import { page } from '$app/state';
+  import { Navbar, NavBrand, NavHamburger, NavLi, NavUl } from 'flowbite-svelte';
 
   type NavLink = {
     name: string;
@@ -13,11 +14,17 @@
   };
 
   const { title, pages }: Props = $props();
+  const activeUrl = $derived(page.url.pathname);
 </script>
 
-<nav class="w-full flex items-center gap-2 p-2 bg-gray-300">
-  <div>{title}</div>
-  {#each pages as { name, href }}
-    <a class={linkStyle} href="{base}/{href}">{name}</a>
-  {/each}
-</nav>
+<Navbar>
+  <NavBrand href="/">
+    <span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">{title}</span>
+  </NavBrand>
+  <NavHamburger />
+  <NavUl {activeUrl}>
+    {#each pages as { name, href }}
+      <NavLi href="{base}/{href}">{name}</NavLi>
+    {/each}
+  </NavUl>
+</Navbar>

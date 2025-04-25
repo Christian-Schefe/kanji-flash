@@ -239,7 +239,7 @@
       "bad",
       "vice",
       "rascal",
-      false,
+      "false",
       "evil",
       "wrong"
     ],
@@ -17720,7 +17720,7 @@
       "fit",
       "suit",
       "join",
-      0.1
+      "0.1"
     ],
     "kunReadings": [
       "あ.う",
@@ -27921,7 +27921,7 @@
     "jlpt": 3,
     "grade": 3,
     "meanings": [
-      true,
+      "true",
       "reality",
       "Buddhist sect"
     ],
@@ -50397,7 +50397,7 @@
       "present",
       "main",
       "origin",
-      true,
+      "true",
       "real",
       "counter for long cylindrical things"
     ],
@@ -58356,7 +58356,7 @@
     "meanings": [
       "pretend",
       "feign",
-      false,
+      "false",
       "deceitful"
     ],
     "kunReadings": [
@@ -106281,7 +106281,7 @@
     "jlpt": null,
     "grade": null,
     "meanings": [
-      false,
+      "false",
       "punish",
       "crime",
       "law"
@@ -123464,7 +123464,7 @@
     "jlpt": null,
     "grade": null,
     "meanings": [
-      40
+      "40"
     ],
     "kunReadings": [
       "よんじゅう",
@@ -124167,7 +124167,7 @@
     "jlpt": null,
     "grade": null,
     "meanings": [
-      false
+      "false"
     ],
     "kunReadings": [
       "か.りる",
@@ -167013,7 +167013,7 @@
       "sure",
       "certain",
       "real",
-      true
+      "true"
     ],
     "kunReadings": [],
     "onReadings": [
@@ -191188,7 +191188,7 @@
     "grade": null,
     "meanings": [
       "counterfeit",
-      false
+      "false"
     ],
     "kunReadings": [
       "ただ.しくない",
@@ -223066,7 +223066,7 @@
     "jlpt": null,
     "grade": 10,
     "meanings": [
-      false,
+      "false",
       "worthless",
       "empty",
       "hollow"

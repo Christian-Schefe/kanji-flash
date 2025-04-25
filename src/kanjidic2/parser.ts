@@ -5,6 +5,8 @@ const parser = new XMLParser({
   ignoreAttributes: false,
   attributeNamePrefix: '',
   preserveOrder: false,
+  parseTagValue: false,
+  parseAttributeValue: false,
   isArray: (_, jpath) => {
     return [
       'kanjidic2.character',

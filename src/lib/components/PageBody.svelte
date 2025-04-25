@@ -1,14 +1,25 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import { ArrowLeftOutline } from 'flowbite-svelte-icons';
 
   type Props = {
     title: string;
-    children: Snippet<[]>;
+    backHref?: string;
+    children?: Snippet<[]>;
   };
-  const { title, children }: Props = $props();
+  const { title, children, backHref }: Props = $props();
 </script>
 
-<div class="flex flex-col">
-  <h1 class="mb-4 self-center text-2xl">{title}</h1>
-  {@render children()}
+<div class="flex flex-col p-2">
+  <div class="relative flex justify-center mb-4">
+    {#if backHref}
+      <a href={backHref} class="h-full w-8 absolute left-0 flex items-center justify-center">
+        <ArrowLeftOutline size="lg" />
+      </a>
+    {/if}
+    <h1 class="align-middle text-2xl">{title}</h1>
+  </div>
+  {#if children}
+    {@render children()}
+  {/if}
 </div>
