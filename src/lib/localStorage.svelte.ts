@@ -12,13 +12,17 @@ export class LocalStore<T> {
     this.value = value;
     this.checkQuery = checkQuery;
 
-    let queryItem = checkQuery != 'none' ? page.url.searchParams.get(this.key) : null;
-    if (queryItem) {
-      const deserializedValue = this.tryDeserializeFromURL(queryItem);
-      if (deserializedValue) this.value = deserializedValue;
+    let hasQueryValue = false;
+    if (checkQuery !== 'none' && page.url.searchParams.has(this.key)) {
+      let queryItem = page.url.searchParams.get(this.key);
+      const deserializedValue = queryItem !== null ? this.tryDeserializeFromURL(queryItem) : null;
+      if (deserializedValue !== null) {
+        this.value = deserializedValue;
+        hasQueryValue = true;
+      }
     }
 
-    if (browser && !queryItem) {
+    if (browser && !hasQueryValue) {
       const item = localStorage.getItem(key);
       if (item) {
         const deserializedValue = this.tryDeserialize(item);
