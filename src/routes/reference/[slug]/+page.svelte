@@ -40,9 +40,9 @@
             <p>JLPT Level: <span class="font-bold">{jlpt}</span></p>
             <p>Frequency: <span class="font-bold">{data.kanji.frequency ?? 'Unknown'}</span></p>
           </div>
-          <div class="col-span-2">
-            <div class="flex">
-              <p class="mr-2 font-bold">On:</p>
+          <div class="grid grid-cols-2 col-span-2" style="grid-template-columns: min-content 1fr;">
+            <p class="mr-2 font-bold">On:</p>
+            <div class="flex flex-wrap">
               {#each data.kanji.onReadings as reading, index}
                 {#if index > 0}
                   <p class="mr-2">,</p>
@@ -50,8 +50,8 @@
                 <p style="font-family: 'Noto Serif JP', sans-serif;">{reading}</p>
               {/each}
             </div>
-            <div class="flex">
-              <p class="mr-2 font-bold">Kun:</p>
+            <p class="mr-2 font-bold">Kun:</p>
+            <div class="flex flex-wrap">
               {#each data.kanji.kunReadings as reading, index}
                 {#if index > 0}
                   <p class="mr-2">,</p>
