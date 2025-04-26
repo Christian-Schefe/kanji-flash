@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { collections } from '$lib/collection.svelte';
   import {
     Button,
     Dropdown,
@@ -16,6 +17,8 @@
     sortBy: string;
     reverse: boolean;
     elementsPerPage: number;
+    collection: string;
+    submitSearch: () => void;
   };
 
   let {
@@ -23,7 +26,9 @@
     gradeFilter = $bindable(),
     sortBy = $bindable(),
     reverse = $bindable(),
-    elementsPerPage = $bindable()
+    elementsPerPage = $bindable(),
+    collection = $bindable(),
+    submitSearch
   }: Props = $props();
 
   const grades = [
@@ -45,6 +50,11 @@
     name: i.toString(),
     value: i
   }));
+
+  const collectionOptions = collections.map((collection) => ({
+    name: collection.name,
+    value: collection.id
+  }));
 </script>
 
 <div class="flex gap-2 flex-row">
@@ -65,12 +75,24 @@
         <Label>Reverse</Label>
       </div>
     </DropdownItem>
+
+    <DropdownItem>
+      <Label>Collection</Label>
+      <Select items={collectionOptions} bind:value={collection} />
+    </DropdownItem>
+
     <DropdownItem>
       <Label>Pagination</Label>
       <Select items={pagingOptions} bind:value={elementsPerPage} />
     </DropdownItem>
   </Dropdown>
   <div class="grow">
-    <Search bind:value={searchTerm} />
+    <Search
+      bind:value={searchTerm}
+      onfocusout={submitSearch}
+      on:keydown={(event) => {
+        if (event.key === 'Enter') submitSearch();
+      }}
+    />
   </div>
 </div>

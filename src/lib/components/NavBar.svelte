@@ -18,11 +18,11 @@
 </script>
 
 <Navbar>
-  <NavBrand href="/">
+  <NavBrand href="{base}/">
     <span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">{title}</span>
   </NavBrand>
   <NavHamburger />
-  <NavUl {activeUrl}>
+  <NavUl {activeUrl} slideParams={{ delay: 0, duration: 300 }}>
     {#each pages as { name, href }}
       <NavLi href="{base}/{href}">{name}</NavLi>
     {/each}

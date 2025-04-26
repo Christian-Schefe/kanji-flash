@@ -60,8 +60,8 @@
               {/each}
             </div>
           </div>
-        </div></Card
-      >
+        </div>
+      </Card>
     </div>
   </PageBody>
 {:else}

@@ -1,11 +1,13 @@
 <script lang="ts">
   import PageBody from '$lib/components/PageBody.svelte';
-  import { Pagination, Select } from 'flowbite-svelte';
+  import { Pagination } from 'flowbite-svelte';
   import type { PageProps } from './$types';
   import Filter from './Filter.svelte';
   import { base } from '$app/paths';
   import { page } from '$app/state';
   import { goto } from '$app/navigation';
+  import { localStore } from '$lib/localStorage.svelte';
+  import { allKanjiCollection, collectionMap } from '$lib/collection.svelte';
 
   const { data }: PageProps = $props();
   const { kanjis } = data;
@@ -19,11 +21,12 @@
   const columns = $derived(Math.floor(divWidth / elementSize));
   const gridWidth = $derived(columns * elementSize);
 
-  let searchTerm = $state('');
-  let gradeFilter = $state('all');
-  let sortBy = $state('literal');
-  let reverse = $state(false);
-  let elementsPerPage = $state(100);
+  let searchTerm = localStore('searchTerm', '', 'read');
+  let sortBy = localStore('sortBy', 'literal', 'sync');
+  let reverse = localStore('reverse', false, 'sync');
+  let gradeFilter = localStore('gradeFilter', 'all', 'sync');
+  let collection = localStore('collection', allKanjiCollection.id, 'sync');
+  let elementsPerPage = localStore('elementsPerPage', 100, 'sync');
 
   const gradeMap = new Map<string, (i: number | null) => boolean>([
     ['kyouiku', (i) => i != null && [1, 2, 3, 4].includes(i)],
@@ -31,15 +34,15 @@
     ['jinmeiyou', (i) => i != null && [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].includes(i)]
   ]);
 
-  const gradeFilterFunc = $derived(gradeMap.get(gradeFilter) || (() => true));
+  const gradeFilterFunc = $derived(gradeMap.get(gradeFilter.value) || (() => true));
 
   const sortedKanjis = $derived(
     kanjis.toSorted((a, b) => {
-      if (reverse) {
+      if (reverse.value) {
         [a, b] = [b, a];
       }
       const tiebreaker = a.literal.localeCompare(b.literal);
-      switch (sortBy) {
+      switch (sortBy.value) {
         case 'literal':
           return tiebreaker;
         case 'frequency':
@@ -56,10 +59,13 @@
     })
   );
 
+  const collectionFilter = $derived(collectionMap.get(collection.value)?.contains || (() => true));
+
   const filteredKanjis = $derived(
     sortedKanjis.filter((kanji) => {
-      const search = searchTerm.toLowerCase();
+      const search = searchTerm.value.toLowerCase();
       return (
+        collectionFilter(kanji) &&
         (kanji.literal.toLowerCase().includes(search) ||
           kanji.meanings.some((meaning) => meaning.toLowerCase().includes(search))) &&
         gradeFilterFunc(kanji.grade)
@@ -68,10 +74,10 @@
   );
 
   const pageKanjis = $derived(
-    filteredKanjis.slice(elementsPerPage * pageIndex, elementsPerPage * (pageIndex + 1))
+    filteredKanjis.slice(elementsPerPage.value * pageIndex, elementsPerPage.value * (pageIndex + 1))
   );
 
-  const pageCount = $derived(Math.ceil(filteredKanjis.length / elementsPerPage));
+  const pageCount = $derived(Math.ceil(filteredKanjis.length / elementsPerPage.value));
   const pageIndices = $derived.by(() => {
     const arr = [pageIndex - 2, pageIndex - 1, pageIndex, pageIndex + 1, pageIndex + 2];
     const offset =
@@ -104,14 +110,25 @@
 </script>
 
 <PageBody title="Reference">
-  <Filter bind:searchTerm bind:gradeFilter bind:sortBy bind:reverse bind:elementsPerPage />
-  <div class="flex justify-center my-4 items-center gap-4">
+  <Filter
+    bind:searchTerm={searchTerm.value}
+    bind:sortBy={sortBy.value}
+    bind:reverse={reverse.value}
+    bind:gradeFilter={gradeFilter.value}
+    bind:elementsPerPage={elementsPerPage.value}
+    bind:collection={collection.value}
+    submitSearch={() => {
+      searchTerm.syncURL();
+    }}
+  />
+  <div class="flex justify-center mt-4 items-center gap-4">
     <Pagination
       {pages}
       on:previous={() => setPage(pageIndex - 1)}
       on:next={() => setPage(pageIndex + 1)}
     />
   </div>
+  <p class="text-center text-gray-500 text-sm my-2">{filteredKanjis.length} Results</p>
   <div class="w-full flex justify-center" bind:clientWidth={divWidth}>
     {#if divWidth === -1}
       <p>Loading...</p>
