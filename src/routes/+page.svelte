@@ -44,7 +44,7 @@
 <PageBody title="Play">
   <div class="flex flex-col items-center gap-4">
     {#each gameModes as mode}
-      <Card href="/" onclick={() => (openGameModes[mode.id] = true)}>
+      <Card onclick={() => (openGameModes[mode.id] = true)}>
         <div class="flex flex-col gap-2">
           <h2 class="text-xl font-bold">{mode.name}</h2>
           <p>{mode.description}</p>
