@@ -8,6 +8,7 @@
   import { goto } from '$app/navigation';
   import { localStore } from '$lib/localStorage.svelte';
   import { allKanjiCollection, collectionMap } from '$lib/collection.svelte';
+  import * as wanakana from 'wanakana';
 
   const { data }: PageProps = $props();
   const { kanjis } = data;
@@ -24,17 +25,31 @@
   let searchTerm = localStore('searchTerm', '', 'read');
   let sortBy = localStore('sortBy', 'literal', 'sync');
   let reverse = localStore('reverse', false, 'sync');
-  let gradeFilter = localStore('gradeFilter', 'all', 'sync');
+  let gradeFilter = localStore('gradeFilter', 'jinmeiyou', 'sync');
+  let excludeLowerGrade = localStore('excludeLowerGrade', false, 'sync');
   let collection = localStore('collection', allKanjiCollection.id, 'sync');
   let elementsPerPage = localStore('elementsPerPage', 100, 'sync');
+  let searchMeaning = localStore('searchMeaning', true, 'sync');
+  let searchKun = localStore('searchKun', true, 'sync');
+  let searchOn = localStore('searchOn', true, 'sync');
 
   const gradeMap = new Map<string, (i: number | null) => boolean>([
-    ['kyouiku', (i) => i != null && [1, 2, 3, 4].includes(i)],
-    ['jouyou', (i) => i != null && [1, 2, 3, 4, 5, 6, 7, 8].includes(i)],
-    ['jinmeiyou', (i) => i != null && [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].includes(i)]
+    ['kyouiku', (i) => i != null && i >= 1 && i <= 4],
+    ['jouyou', (i) => i != null && i >= 1 && i <= 8],
+    ['jinmeiyou', (i) => i != null && i >= 1 && 1 <= 10],
+    ['all', () => true]
   ]);
 
-  const gradeFilterFunc = $derived(gradeMap.get(gradeFilter.value) || (() => true));
+  const exclusiveGradeMap = new Map<string, (i: number | null) => boolean>([
+    ['kyouiku', (i) => i != null && i >= 1 && i <= 4],
+    ['jouyou', (i) => i != null && i >= 5 && i <= 8],
+    ['jinmeiyou', (i) => i != null && i >= 9 && i <= 10],
+    ['all', (i) => i == null || i < 1 || i > 10]
+  ]);
+
+  const gradeFilterFunc = $derived(
+    (excludeLowerGrade.value ? exclusiveGradeMap : gradeMap).get(gradeFilter.value) || (() => true)
+  );
 
   const sortedKanjis = $derived(
     kanjis.toSorted((a, b) => {
@@ -61,17 +76,27 @@
 
   const collectionFilter = $derived(collectionMap.get(collection.value)?.contains || (() => true));
 
-  const filteredKanjis = $derived(
-    sortedKanjis.filter((kanji) => {
-      const search = searchTerm.value.toLowerCase();
+  const filteredKanjis = $derived.by(() => {
+    const search = searchTerm.value.toLowerCase();
+    const hiraganaSearch = wanakana.toHiragana(search);
+    return sortedKanjis.filter((kanji) => {
       return (
         collectionFilter(kanji) &&
         (kanji.literal.toLowerCase().includes(search) ||
-          kanji.meanings.some((meaning) => meaning.toLowerCase().includes(search))) &&
+          (searchMeaning.value &&
+            kanji.meanings.some((meaning) => meaning.toLowerCase().includes(search))) ||
+          (searchOn.value &&
+            kanji.onReadings.some((reading) =>
+              wanakana.toHiragana(reading).includes(hiraganaSearch)
+            )) ||
+          (searchKun.value &&
+            kanji.kunReadings.some((reading) =>
+              reading.replace('.', '').includes(hiraganaSearch)
+            ))) &&
         gradeFilterFunc(kanji.grade)
       );
-    })
-  );
+    });
+  });
 
   const pageKanjis = $derived(
     filteredKanjis.slice(elementsPerPage.value * pageIndex, elementsPerPage.value * (pageIndex + 1))
@@ -115,10 +140,26 @@
     bind:sortBy={sortBy.value}
     bind:reverse={reverse.value}
     bind:gradeFilter={gradeFilter.value}
+    bind:excludeLowerGrade={excludeLowerGrade.value}
     bind:elementsPerPage={elementsPerPage.value}
     bind:collection={collection.value}
+    bind:searchMeaning={searchMeaning.value}
+    bind:searchKun={searchKun.value}
+    bind:searchOn={searchOn.value}
     submitSearch={() => {
       searchTerm.syncURL();
+    }}
+    reset={() => {
+      searchTerm.reset();
+      sortBy.reset();
+      reverse.reset();
+      gradeFilter.reset();
+      excludeLowerGrade.reset();
+      collection.reset();
+      elementsPerPage.reset();
+      searchMeaning.reset();
+      searchKun.reset();
+      searchOn.reset();
     }}
   />
   <div class="flex justify-center mt-4 items-center gap-4">

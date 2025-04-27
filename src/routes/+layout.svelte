@@ -9,7 +9,7 @@
   <NavBar
     title="Kanji Flash"
     pages={[
-      { name: 'Play', href: '' },
+      { name: 'Play', href: 'play' },
       { name: 'Collections', href: 'collections' },
       { name: 'Reference', href: 'reference' },
       { name: 'Settings', href: 'settings' }

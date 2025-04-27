@@ -2,6 +2,7 @@
   import { collections } from '$lib/collection.svelte';
   import {
     Button,
+    Checkbox,
     Dropdown,
     DropdownItem,
     Label,
@@ -10,27 +11,37 @@
     Select,
     Toggle
   } from 'flowbite-svelte';
+  import { FilterOutline } from 'flowbite-svelte-icons';
 
   type Props = {
     searchTerm: string;
     gradeFilter: string;
+    excludeLowerGrade: boolean;
     sortBy: string;
     reverse: boolean;
     elementsPerPage: number;
     collection: string;
+    searchMeaning: boolean;
+    searchKun: boolean;
+    searchOn: boolean;
     submitSearch: () => void;
+    reset: () => void;
   };
 
   let {
     searchTerm = $bindable(),
     gradeFilter = $bindable(),
+    excludeLowerGrade = $bindable(),
     sortBy = $bindable(),
     reverse = $bindable(),
     elementsPerPage = $bindable(),
     collection = $bindable(),
-    submitSearch
+    searchMeaning = $bindable(),
+    searchKun = $bindable(),
+    searchOn = $bindable(),
+    submitSearch,
+    reset
   }: Props = $props();
-
   const grades = [
     { value: 'kyouiku', name: 'Kyouiku' },
     { value: 'jouyou', name: 'Jouyou' },
@@ -58,13 +69,24 @@
 </script>
 
 <div class="flex gap-2 flex-row">
-  <Button>Filter</Button>
+  <Button><FilterOutline /></Button>
   <Dropdown class="min-w-96">
+    <DropdownItem
+      ><Label>Search In</Label>
+      <Checkbox bind:checked={searchMeaning}>{'Meaning'}</Checkbox>
+      <Checkbox bind:checked={searchOn}>{'Onyomi'}</Checkbox>
+      <Checkbox bind:checked={searchKun}>{'Kunyomi'}</Checkbox>
+    </DropdownItem>
+
     <DropdownItem
       ><Label>Filter By Grade</Label>
       {#each grades as grade}
         <Radio value={grade.value} bind:group={gradeFilter}>{grade.name}</Radio>
       {/each}
+      <div class="flex mt-2 items-center">
+        <Toggle bind:checked={excludeLowerGrade} />
+        <Label>Exclude Lower Grade</Label>
+      </div>
     </DropdownItem>
 
     <DropdownItem>
@@ -84,6 +106,11 @@
     <DropdownItem>
       <Label>Pagination</Label>
       <Select items={pagingOptions} bind:value={elementsPerPage} />
+    </DropdownItem>
+    <DropdownItem>
+      <div class="flex flex-col items-center">
+        <Button onclick={reset}>Reset</Button>
+      </div>
     </DropdownItem>
   </Dropdown>
   <div class="grow">

@@ -4,12 +4,14 @@ import { page } from '$app/state';
 
 export class LocalStore<T> {
   value = $state<T>() as T;
+  defaultValue: T;
   key = '';
   checkQuery: 'none' | 'read' | 'sync' = 'none';
 
   constructor(key: string, value: T, checkQuery: 'none' | 'read' | 'sync') {
     this.key = key;
     this.value = value;
+    this.defaultValue = value;
     this.checkQuery = checkQuery;
 
     let hasQueryValue = false;
@@ -52,6 +54,10 @@ export class LocalStore<T> {
       page.url.searchParams.set(this.key, cur);
       goto(page.url);
     }
+  }
+
+  reset() {
+    this.value = this.defaultValue;
   }
 
   tryDeserialize(item: string): T | null {
