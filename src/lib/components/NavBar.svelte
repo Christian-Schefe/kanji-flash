@@ -19,7 +19,7 @@
 
 <Navbar>
   <NavBrand href="{base}/">
-    <span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">{title}</span>
+    <span class="self-center whitespace-nowrap text-xl font-semibold">{title}</span>
   </NavBrand>
   <NavHamburger />
   <NavUl {activeUrl} slideParams={{ delay: 0, duration: 300 }}>

@@ -22,16 +22,16 @@
   const columns = $derived(Math.floor(divWidth / elementSize));
   const gridWidth = $derived(columns * elementSize);
 
-  let searchTerm = localStore('searchTerm', '', 'read');
-  let sortBy = localStore('sortBy', 'literal', 'sync');
-  let reverse = localStore('reverse', false, 'sync');
-  let gradeFilter = localStore('gradeFilter', 'jinmeiyou', 'sync');
-  let excludeLowerGrade = localStore('excludeLowerGrade', false, 'sync');
-  let collection = localStore('collection', allKanjiCollection.id, 'sync');
-  let elementsPerPage = localStore('elementsPerPage', 100, 'sync');
-  let searchMeaning = localStore('searchMeaning', true, 'sync');
-  let searchKun = localStore('searchKun', true, 'sync');
-  let searchOn = localStore('searchOn', true, 'sync');
+  const searchTerm = localStore('searchTerm', '', 'read');
+  const sortBy = localStore('sortBy', 'literal', 'sync');
+  const reverse = localStore('reverse', false, 'sync');
+  const gradeFilter = localStore('gradeFilter', 'jinmeiyou', 'sync');
+  const excludeLowerGrade = localStore('excludeLowerGrade', false, 'sync');
+  const collection = localStore('collection', allKanjiCollection.id, 'sync');
+  const elementsPerPage = localStore('elementsPerPage', 100, 'sync');
+  const searchMeaning = localStore('searchMeaning', true, 'sync');
+  const searchKun = localStore('searchKun', true, 'sync');
+  const searchOn = localStore('searchOn', true, 'sync');
 
   const gradeMap = new Map<string, (i: number | null) => boolean>([
     ['kyouiku', (i) => i != null && i >= 1 && i <= 4],
@@ -52,18 +52,18 @@
   );
 
   const sortedKanjis = $derived(
-    kanjis.toSorted((a, b) => {
-      if (reverse.value) {
-        [a, b] = [b, a];
-      }
+    kanjis.toSorted((x, y) => {
+      const a = reverse.value ? y : x;
+      const b = reverse.value ? x : y;
+      const inf = Number.POSITIVE_INFINITY;
       const tiebreaker = a.literal.localeCompare(b.literal);
       switch (sortBy.value) {
         case 'literal':
           return tiebreaker;
         case 'frequency':
-          return (a.frequency ?? Infinity) - (b.frequency ?? Infinity) || tiebreaker;
+          return (a.frequency ?? inf) - (b.frequency ?? inf) || tiebreaker;
         case 'grade':
-          return (a.grade ?? Infinity) - (b.grade ?? Infinity) || tiebreaker;
+          return (a.grade ?? inf) - (b.grade ?? inf) || tiebreaker;
         case 'jlpt':
           return (b.jlpt ?? 0) - (a.jlpt ?? 0) || tiebreaker;
         case 'strokes':
@@ -185,7 +185,7 @@
               elementMargin}px; margin: {elementMargin / 2}px;
               font-size: {elementSize / 1.5 - 10}px;
               font-family: 'Noto Serif JP', sans-serif;"
-            class="p-1 outline outline-gray-300 rounded-lg text-center hover:outline-blue-400 active:bg-blue-100"
+            class="p-1 outline outline-gray-300 dark:outline-gray-700 rounded-lg text-center hover:outline-blue-400 active:bg-blue-100"
           >
             {kanji.literal}
           </a>

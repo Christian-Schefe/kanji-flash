@@ -4,7 +4,7 @@
   import type { PageProps } from './$types';
   import { base } from '$app/paths';
 
-  let { data }: PageProps = $props();
+  const { data }: PageProps = $props();
 
   const jlpt = ['N0', 'N1', 'N2 - N3', 'N4', 'N5'][data.kanji?.jlpt ?? 0];
   const grade = [
@@ -27,7 +27,7 @@
   <PageBody title="Kanji" backHref="{base}/reference">
     <div class="flex flex-col items-center">
       <Card size="md">
-        <div class="text-black grid grid-cols-2" style="grid-template-columns: min-content 1fr;">
+        <div class="grid grid-cols-2" style="grid-template-columns: min-content 1fr;">
           <div class="flex flex-col gap-2 items-center mb-4 mr-4">
             <p class="text-8xl" style="font-family: 'Noto Serif JP', sans-serif;">
               {data.kanji.literal}

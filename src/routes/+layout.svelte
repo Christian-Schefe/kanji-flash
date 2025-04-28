@@ -5,7 +5,7 @@
   const { children } = $props();
 </script>
 
-<div class="w-full max-w-6xl mx-auto flex flex-col bg-white">
+<div class="w-full max-w-6xl mx-auto flex flex-col">
   <NavBar
     title="Kanji Flash"
     pages={[
