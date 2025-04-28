@@ -44,9 +44,7 @@ export class LocalStore<T> {
     if (this.isMounted) return;
     this.isMounted = true;
 
-    console.log('mounting local store', this.key);
     $effect(() => {
-      console.log('updating local store', this.key, this.value);
       localStorage.setItem(this.key, this.serialize(this.value));
       if (this.checkQuery === 'sync') {
         this.syncURL();
@@ -110,12 +108,4 @@ export function localStore<T>(
   checkQuery: 'none' | 'read' | 'sync' = 'none'
 ) {
   return new LocalStore(key, value, checkQuery);
-}
-
-export function localStoreUnmounted<T>(
-  key: string,
-  value: T,
-  checkQuery: 'none' | 'read' | 'sync' = 'none'
-) {
-  return new LocalStore(key, value, checkQuery, false);
 }
