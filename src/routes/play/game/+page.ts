@@ -1,5 +1,5 @@
 import { base } from '$app/paths';
-import type { Kanji } from '../../kanjidic2/types';
+import type { Kanji } from '../../../kanjidic2/types';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ fetch }) => {

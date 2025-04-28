@@ -3,7 +3,7 @@
   import { ArrowLeftOutline } from 'flowbite-svelte-icons';
 
   type Props = {
-    title: string;
+    title?: string;
     backHref?: string;
     children?: Snippet<[]>;
   };
@@ -17,7 +17,9 @@
         <ArrowLeftOutline size="lg" />
       </a>
     {/if}
-    <h1 class="align-middle text-2xl">{title}</h1>
+    {#if title}
+      <h1 class="align-middle text-2xl text-black dark:text-white">{title}</h1>
+    {/if}
   </div>
   {#if children}
     {@render children()}

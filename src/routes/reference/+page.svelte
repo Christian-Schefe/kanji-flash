@@ -33,6 +33,26 @@
   const searchKun = localStore('searchKun', true, 'sync');
   const searchOn = localStore('searchOn', true, 'sync');
 
+  const maybeRegex = $derived.by(() => {
+    if (
+      !(
+        searchTerm.value.length > 1 &&
+        searchTerm.value[0] === '/' &&
+        searchTerm.value.slice(-1) === '/'
+      )
+    ) {
+      return null;
+    }
+    try {
+      return new RegExp(searchTerm.value.slice(1, -1));
+    } catch (e) {
+      return null;
+    }
+  });
+  const isRegex = $derived(maybeRegex !== null);
+  const search = $derived(isRegex ? (maybeRegex as RegExp) : searchTerm.value.toLowerCase());
+  const kanaSearch = $derived(isRegex ? search : wanakana.toHiragana(search as string));
+
   const gradeMap = new Map<string, (i: number | null) => boolean>([
     ['kyouiku', (i) => i != null && i >= 1 && i <= 4],
     ['jouyou', (i) => i != null && i >= 1 && i <= 8],
@@ -76,24 +96,24 @@
 
   const collectionFilter = $derived(collectionMap.get(collection.value)?.contains || (() => true));
 
+  const stringFilter = $derived((str: string, searchKana: boolean) =>
+    isRegex
+      ? (search as RegExp).test(str.toLowerCase())
+      : str.toLowerCase().includes((searchKana ? kanaSearch : search) as string)
+  );
+
   const filteredKanjis = $derived.by(() => {
-    const search = searchTerm.value.toLowerCase();
-    const hiraganaSearch = wanakana.toHiragana(search);
     return sortedKanjis.filter((kanji) => {
       return (
         collectionFilter(kanji) &&
-        (kanji.literal.toLowerCase().includes(search) ||
-          (searchMeaning.value &&
-            kanji.meanings.some((meaning) => meaning.toLowerCase().includes(search))) ||
+        gradeFilterFunc(kanji.grade) &&
+        (searchTerm.value.length === 0 ||
+          stringFilter(kanji.literal, false) ||
+          (searchMeaning.value && kanji.meanings.some((meaning) => stringFilter(meaning, false))) ||
           (searchOn.value &&
-            kanji.onReadings.some((reading) =>
-              wanakana.toHiragana(reading).includes(hiraganaSearch)
-            )) ||
+            kanji.onReadings.some((reading) => stringFilter(wanakana.toHiragana(reading), true))) ||
           (searchKun.value &&
-            kanji.kunReadings.some((reading) =>
-              reading.replace('.', '').includes(hiraganaSearch)
-            ))) &&
-        gradeFilterFunc(kanji.grade)
+            kanji.kunReadings.some((reading) => stringFilter(reading.replace('.', ''), true))))
       );
     });
   });
