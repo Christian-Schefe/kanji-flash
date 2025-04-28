@@ -14,7 +14,10 @@
   };
 
   const { title, pages }: Props = $props();
-  const activeUrl = $derived(page.url.pathname);
+  const activeUrl = $derived.by(() => {
+    const parts = page.url.pathname.slice(base.length + 1).split('/');
+    return parts.length >= 1 ? `/${parts[0]}` : '/';
+  });
 </script>
 
 <Navbar>

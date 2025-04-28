@@ -10,6 +10,11 @@
       description: 'Play the game with different modes and settings.'
     },
     {
+      destination: 'play/game',
+      name: 'Game',
+      description: 'Continue your game.'
+    },
+    {
       destination: 'collections',
       name: 'Collections',
       description: 'Browse available kanji collections.'
