@@ -7,16 +7,17 @@ export class LocalStore<T> {
   defaultValue: T;
   key = '';
   checkQuery: 'none' | 'read' | 'sync' = 'none';
+  isMounted = false;
 
-  constructor(key: string, value: T, checkQuery: 'none' | 'read' | 'sync') {
+  constructor(key: string, value: T, checkQuery: 'none' | 'read' | 'sync', mount = true) {
     this.key = key;
     this.value = value;
     this.defaultValue = value;
     this.checkQuery = checkQuery;
 
     let hasQueryValue = false;
-    if (checkQuery !== 'none' && page.url.searchParams.has(this.key)) {
-      let queryItem = page.url.searchParams.get(this.key);
+    if (this.checkQuery !== 'none' && page.url.searchParams.has(this.key)) {
+      const queryItem = page.url.searchParams.get(this.key);
       const deserializedValue = queryItem !== null ? this.tryDeserializeFromURL(queryItem) : null;
       if (deserializedValue !== null) {
         this.value = deserializedValue;
@@ -25,7 +26,7 @@ export class LocalStore<T> {
     }
 
     if (browser && !hasQueryValue) {
-      const item = localStorage.getItem(key);
+      const item = localStorage.getItem(this.key);
       if (item) {
         const deserializedValue = this.tryDeserialize(item);
         if (deserializedValue) {
@@ -34,7 +35,18 @@ export class LocalStore<T> {
       }
     }
 
+    if (mount) {
+      this.mount();
+    }
+  }
+
+  mount() {
+    if (this.isMounted) return;
+    this.isMounted = true;
+
+    console.log('mounting local store', this.key);
     $effect(() => {
+      console.log('updating local store', this.key, this.value);
       localStorage.setItem(this.key, this.serialize(this.value));
       if (this.checkQuery === 'sync') {
         this.syncURL();
@@ -98,4 +110,12 @@ export function localStore<T>(
   checkQuery: 'none' | 'read' | 'sync' = 'none'
 ) {
   return new LocalStore(key, value, checkQuery);
+}
+
+export function localStoreUnmounted<T>(
+  key: string,
+  value: T,
+  checkQuery: 'none' | 'read' | 'sync' = 'none'
+) {
+  return new LocalStore(key, value, checkQuery, false);
 }

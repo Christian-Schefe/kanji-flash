@@ -11,7 +11,7 @@
 <PageBody title="">
   {#if gameModeSettingsStore.value !== null}
     {#if gameModeSettingsStore.value.mode === 'flash'}
-      <Flash kanjis={data.kanjis} settings={gameModeSettingsStore.value.settings['flash']} />
+      <Flash kanjis={data.kanjis} gameSettings={gameModeSettingsStore.value.settings.flash} />
     {:else if gameModeSettingsStore.value.mode === 'spacedRepetition'}
       <h1 class="text-2xl font-bold mb-4">Spaced Repetition</h1>
       <p>Spaced Repetition mode is not yet implemented.</p>

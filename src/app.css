@@ -25,8 +25,15 @@
 }
 @source "../node_modules/flowbite-svelte/dist";
 
-.noto-serif-jp-400 {
+.noto-serif-jp {
   font-family: 'Noto Serif JP', serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.noto-sans-jp {
+  font-family: 'Noto Sans JP', sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;

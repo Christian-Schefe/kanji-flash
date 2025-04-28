@@ -3,6 +3,7 @@
   import { Card } from 'flowbite-svelte';
   import type { PageProps } from './$types';
   import { base } from '$app/paths';
+  import { settings } from '$lib/settings.svelte';
 
   const { data }: PageProps = $props();
 
@@ -21,6 +22,8 @@
     'Jinmeiyou',
     'Jinmeiyou'
   ][data.kanji?.grade ?? 0];
+
+  const fontClass = $derived(settings.settings.font);
 </script>
 
 {#if data.kanji != null}
@@ -29,7 +32,7 @@
       <Card size="md">
         <div class="grid grid-cols-2" style="grid-template-columns: min-content 1fr;">
           <div class="flex flex-col gap-2 items-center mb-4 mr-4">
-            <p class="text-8xl" style="font-family: 'Noto Serif JP', sans-serif;">
+            <p class="text-8xl {fontClass}">
               {data.kanji.literal}
             </p>
             <p>{data.kanji.strokes} strokes</p>
@@ -47,7 +50,7 @@
                 {#if index > 0}
                   <p class="mr-2">,</p>
                 {/if}
-                <p style="font-family: 'Noto Serif JP', sans-serif;">{reading}</p>
+                <p class={fontClass}>{reading}</p>
               {/each}
             </div>
             <p class="mr-2 font-bold">Kun:</p>
@@ -56,7 +59,7 @@
                 {#if index > 0}
                   <p class="mr-2">,</p>
                 {/if}
-                <p style="font-family: 'Noto Serif JP', sans-serif;">{reading}</p>
+                <p class={fontClass}>{reading}</p>
               {/each}
             </div>
           </div>

@@ -9,6 +9,7 @@
   import { localStore } from '$lib/localStorage.svelte';
   import { allKanjiCollection, collectionMap } from '$lib/collection.svelte';
   import * as wanakana from 'wanakana';
+  import { settings } from '$lib/settings.svelte';
 
   const { data }: PageProps = $props();
   const { kanjis } = data;
@@ -152,6 +153,8 @@
     pageIndex = Math.min(Math.max(i, 0), pageCount - 1);
     goto(`${base}/reference?page=${pageIndex + 1}`);
   };
+
+  const fontClass = $derived(settings.settings.font);
 </script>
 
 <PageBody title="Reference">
@@ -203,9 +206,8 @@
             href="{base}/reference/{kanji.literal}"
             style="width: {elementSize - elementMargin}px; height: {elementSize -
               elementMargin}px; margin: {elementMargin / 2}px;
-              font-size: {elementSize / 1.5 - 10}px;
-              font-family: 'Noto Serif JP', sans-serif;"
-            class="p-1 outline outline-gray-300 dark:outline-gray-700 rounded-lg text-center hover:outline-blue-400 active:bg-blue-100"
+              font-size: {elementSize / 1.5 - 10}px;"
+            class="{fontClass} p-1 outline outline-gray-300 dark:outline-gray-700 rounded-lg text-center hover:outline-blue-400 active:bg-blue-100"
           >
             {kanji.literal}
           </a>
