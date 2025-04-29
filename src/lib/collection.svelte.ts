@@ -1,4 +1,4 @@
-import type { Kanji } from '../kanjidic2/types';
+import type { Kanji } from '../kanji-data/types';
 
 export interface KanjiCollection {
   id: string;

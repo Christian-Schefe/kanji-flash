@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build-kanji": "bun src/kanjidic2/main.ts",
+    "build-kanji": "bun src/kanji-data/main.ts",
     "build": "bun run build-kanji && vite build",
     "preview": "vite preview",
     "prepare": "svelte-kit sync || echo ''",

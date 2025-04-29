@@ -1,7 +1,7 @@
 <script lang="ts">
   import { allKanjiCollection, collectionMap } from '$lib/collection.svelte';
   import { Button } from 'flowbite-svelte';
-  import type { Kanji } from '../../kanjidic2/types';
+  import type { Kanji } from '../../kanji-data/types';
   import type { FlashSettings } from './FlashSettings';
   import { localStore } from '$lib/localStorage.svelte';
   import { settings } from '$lib/settings.svelte';
@@ -37,6 +37,14 @@
   });
 
   const fontClass = $derived(settings.settings.font);
+  const keyword = $derived(currentKanji?.rtk?.keyword);
+  const meanings = $derived.by(() => {
+    if (!currentKanji) return '';
+    if (!keyword) return currentKanji.meanings.join(', ');
+    const notRtkMeanings = currentKanji.meanings.filter((m) => m !== keyword);
+    const str = notRtkMeanings.join(', ');
+    return notRtkMeanings.length === 0 ? str : `, ${str}`;
+  });
 </script>
 
 <div class="flex flex-col items-center gap-4">
@@ -50,7 +58,7 @@
       </div>
     {:else if currentFace.value === 'meanings'}
       <p class="text-xl text-center">
-        {currentKanji.meanings.join(', ')}
+        {#if keyword}<span class="underline">{keyword}</span>{/if}{meanings}
       </p>
       <div class="grow"></div>
       <div class="absolute bottom-5 left-5 right-5 flex justify-center">
@@ -61,7 +69,9 @@
         {currentKanji.literal}
       </p>
       <div class="grow"></div>
-      <p class="text-xl text-center">{currentKanji.meanings.join(', ')}</p>
+      <p class="text-xl text-center">
+        {#if keyword}<span class="underline">{keyword}</span>{/if}{meanings}
+      </p>
       <div class="grid" style="grid-template-columns: min-content 1fr;">
         <p class="text-xl mr-2">On:</p>
         <p class="text-xl {fontClass}">{currentKanji.onReadings.join(', ')}</p>

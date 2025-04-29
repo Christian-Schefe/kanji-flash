@@ -24,6 +24,14 @@
   ][data.kanji?.grade ?? 0];
 
   const fontClass = $derived(settings.settings.font);
+  const keyword = $derived(data.kanji?.rtk?.keyword);
+  const meanings = $derived.by(() => {
+    if (!data.kanji) return '';
+    if (!keyword) return data.kanji.meanings.join(', ');
+    const notRtkMeanings = data.kanji.meanings.filter((m) => m !== keyword);
+    const str = notRtkMeanings.join(', ');
+    return notRtkMeanings.length === 0 ? str : `, ${str}`;
+  });
 </script>
 
 {#if data.kanji != null}
@@ -38,12 +46,14 @@
             <p>{data.kanji.strokes} strokes</p>
           </div>
           <div>
-            <p class="text-2xl mb-2">{data.kanji.meanings.join(', ')}</p>
+            <p class="text-2xl mb-2">
+              {#if keyword}<span class="underline">{keyword}</span>{/if}{meanings}
+            </p>
             <p>Grade: <span class="font-bold">{grade}</span></p>
             <p>JLPT Level: <span class="font-bold">{jlpt}</span></p>
             <p>Frequency: <span class="font-bold">{data.kanji.frequency ?? 'Unknown'}</span></p>
           </div>
-          <div class="grid grid-cols-2 col-span-2" style="grid-template-columns: min-content 1fr;">
+          <div class="grid grid-cols-2 col-span-2" style="grid-template-column: min-content 1fr;">
             <p class="mr-2 font-bold">On:</p>
             <div class="flex flex-wrap">
               {#each data.kanji.onReadings as reading, index}
