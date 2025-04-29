@@ -10,7 +10,7 @@
 </script>
 
 <PageBody title="Settings">
-  <div class="flex flex-col items-center">
+  <div class="flex flex-col items-center gap-4">
     <DarkMode />
     <div>
       <Label>Font for Japanese characters</Label>

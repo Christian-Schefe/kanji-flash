@@ -1,32 +1,38 @@
-import { browser } from '$app/environment';
+import { browser } from "$app/environment";
+import { storagePrefix } from "./localStorage.svelte";
 
 type Settings = {
-  settings: {
-    font: string;
-  };
+	settings: {
+		font: string;
+	};
 };
 
 const defaultSettings = {
-  font: 'noto-sans-jp'
+	font: "noto-sans-jp",
 };
 
 export const settings: Settings = $state({
-  settings: defaultSettings
+	settings: defaultSettings,
 });
 let hasLoaded = false;
 
 export const mountSettings = () => {
-  $effect(() => {
-    if (!hasLoaded) {
-      settings.settings = browser
-        ? JSON.parse(localStorage.getItem('settings') ?? 'null') || defaultSettings
-        : defaultSettings;
+	$effect(() => {
+		if (!hasLoaded) {
+			settings.settings = browser
+				? JSON.parse(
+						localStorage.getItem(`${storagePrefix}settings`) ?? "null",
+					) || defaultSettings
+				: defaultSettings;
 
-      hasLoaded = true;
-    }
-  });
+			hasLoaded = true;
+		}
+	});
 
-  $effect(() => {
-    localStorage.setItem('settings', JSON.stringify(settings.settings));
-  });
+	$effect(() => {
+		localStorage.setItem(
+			`${storagePrefix}settings`,
+			JSON.stringify(settings.settings),
+		);
+	});
 };

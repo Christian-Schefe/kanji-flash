@@ -16,7 +16,7 @@
   const { title, pages }: Props = $props();
   const activeUrl = $derived.by(() => {
     const parts = page.url.pathname.slice(base.length + 1).split('/');
-    return parts.length >= 1 ? `/${parts[0]}` : '/';
+    return parts.length >= 1 ? `${base}/${parts[0]}` : '${base}/';
   });
 </script>
 
