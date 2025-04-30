@@ -4,8 +4,7 @@
   import type { PageProps } from './$types';
   import Filter from './Filter.svelte';
   import { base } from '$app/paths';
-  import { page } from '$app/state';
-  import { goto } from '$app/navigation';
+  import { beforeNavigate, goto } from '$app/navigation';
   import { localStore } from '$lib/localStorage.svelte';
   import { allKanjiCollection, collectionMap } from '$lib/collection.svelte';
   import * as wanakana from 'wanakana';
@@ -15,7 +14,8 @@
   const { kanjis } = data;
 
   let divWidth = $state(-1);
-  let pageIndex = $derived((Number(page.url.searchParams.get('page')) ?? 1) - 1);
+  let pageIndexStore = localStore('page', 1, 'read');
+  const pageIndex = $derived(pageIndexStore.value - 1);
 
   const elementSize = 50;
   const elementMargin = 8;
@@ -110,7 +110,9 @@
         gradeFilterFunc(kanji.grade) &&
         (searchTerm.value.length === 0 ||
           stringFilter(kanji.literal, false) ||
-          (searchMeaning.value && kanji.meanings.some((meaning) => stringFilter(meaning, false))) ||
+          (searchMeaning.value &&
+            (kanji.meanings.some((meaning) => stringFilter(meaning, false)) ||
+              (kanji.rtk && stringFilter(kanji.rtk.keyword, false)))) ||
           (searchOn.value &&
             kanji.onReadings.some((reading) => stringFilter(wanakana.toHiragana(reading), true))) ||
           (searchKun.value &&
@@ -145,13 +147,26 @@
   $effect(() => {
     const newPageIndex = Math.min(Math.max(pageIndex, 0), pageCount - 1);
     if (newPageIndex !== pageIndex) {
-      pageIndex = newPageIndex;
+      pageIndexStore.value = newPageIndex + 1;
+    }
+  });
+
+  beforeNavigate((event) => {
+    if (!event.to || event.to.url.pathname !== `${base}/reference`) {
+      return;
+    }
+    const pageIndex = event.to?.url?.searchParams?.get('page');
+    if (pageIndex) {
+      const newPageIndex = Number.parseInt(pageIndex, 10);
+      if (!Number.isNaN(newPageIndex)) {
+        pageIndexStore.value = Math.min(Math.max(newPageIndex, 1), pageCount);
+      }
     }
   });
 
   const setPage = (i: number) => {
-    pageIndex = Math.min(Math.max(i, 0), pageCount - 1);
-    goto(`${base}/reference?page=${pageIndex + 1}`);
+    const newPageIndex = Math.min(Math.max(i, 0), pageCount - 1) + 1;
+    goto(`${base}/reference?page=${newPageIndex}`);
   };
 
   const fontClass = $derived(settings.settings.font);
