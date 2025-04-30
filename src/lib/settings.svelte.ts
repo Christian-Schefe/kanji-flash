@@ -1,68 +1,91 @@
-import { browser } from "$app/environment";
-import { storagePrefix } from "./localStorage.svelte";
+import { browser } from '$app/environment';
+import { allKanjiCollection } from './collection.svelte';
+import { defaultFlashState, type FlashSettings, type FlashState } from './game/FlashSettings';
+import { storagePrefix } from './localStorage.svelte';
 
 type Settings = {
-	settings: {
-		font: string;
-	};
+  settings: {
+    font: string;
+    gameModeSettings: {
+      none: null;
+      flash: FlashSettings;
+    };
+  };
 };
 
 type State = {
-	state: {
-		badKanjis: {
-			[kanji: string]: number;
-		};
-	};
+  state: {
+    badKanjis: {
+      [kanji: string]: number;
+    };
+    gameMode: 'none' | 'flash';
+    gameModeState: {
+      none: null;
+      flash: FlashState;
+    };
+  };
 };
 
-const defaultSettings = {
-	font: "noto-sans-jp",
+const defaultSettings: Settings['settings'] = {
+  font: 'noto-sans-jp',
+  gameModeSettings: {
+    none: null,
+    flash: {
+      collection: allKanjiCollection.id,
+      mode: 'kanjiAndMeaning',
+      review: false
+    }
+  }
 };
 
-const defaultState = {
-	badKanjis: {},
+const defaultState: State['state'] = {
+  badKanjis: {},
+  gameMode: 'none',
+  gameModeState: {
+    none: null,
+    flash: defaultFlashState
+  }
 };
 
 export const settings: Settings = $state({
-	settings: defaultSettings,
+  settings: defaultSettings
 });
 
-export const state: State = $state({
-	state: defaultState,
+export const stateData: State = $state({
+  state: defaultState
 });
 
 let hasSettingsLoaded = false;
 let hasStateLoaded = false;
 
 export const mountSettings = () => {
-	const settingsKey = `${storagePrefix}settings`;
-	const stateKey = `${storagePrefix}state`;
-	$effect(() => {
-		if (!hasSettingsLoaded) {
-			settings.settings = browser
-				? JSON.parse(localStorage.getItem(settingsKey) ?? "null") ||
-					defaultSettings
-				: defaultSettings;
+  const settingsKey = `${storagePrefix}settings`;
+  const stateKey = `${storagePrefix}state`;
+  $effect(() => {
+    if (!hasSettingsLoaded) {
+      settings.settings = browser
+        ? JSON.parse(localStorage.getItem(settingsKey) ?? 'null') || defaultSettings
+        : defaultSettings;
 
-			hasSettingsLoaded = true;
-		}
-	});
+      hasSettingsLoaded = true;
+    }
+  });
 
-	$effect(() => {
-		if (!hasStateLoaded) {
-			state.state = browser
-				? JSON.parse(localStorage.getItem(stateKey) ?? "null") || defaultState
-				: defaultState;
+  $effect(() => {
+    if (!hasStateLoaded) {
+      stateData.state = browser
+        ? JSON.parse(localStorage.getItem(stateKey) ?? 'null') || defaultState
+        : defaultState;
 
-			hasStateLoaded = true;
-		}
-	});
+      hasStateLoaded = true;
+    }
+  });
 
-	$effect(() => {
-		localStorage.setItem(settingsKey, JSON.stringify(settings.settings));
-	});
+  $effect(() => {
+    localStorage.setItem(settingsKey, JSON.stringify(settings.settings));
+  });
 
-	$effect(() => {
-		localStorage.setItem(stateKey, JSON.stringify(state.state));
-	});
+  $effect(() => {
+    localStorage.setItem(stateKey, JSON.stringify(stateData.state));
+  });
 };

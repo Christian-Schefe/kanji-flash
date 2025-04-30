@@ -3,27 +3,31 @@
   import { Button, ButtonGroup } from 'flowbite-svelte';
   import type { Kanji } from '../../kanji-data/types';
   import type { FlashSettings } from './FlashSettings';
-  import { localStore } from '$lib/localStorage.svelte';
-  import { settings, state } from '$lib/settings.svelte';
+  import { LocalStore, localStore } from '$lib/localStorage.svelte';
+  import { settings, stateData } from '$lib/settings.svelte';
+  import KanjiMeanings from '$lib/components/KanjiMeanings.svelte';
 
   type Props = {
     kanjis: Kanji[];
-    gameSettings: FlashSettings;
   };
 
-  const { kanjis, gameSettings }: Props = $props();
+  const { kanjis }: Props = $props();
 
+  const gameSettings = $derived(settings.settings.gameModeSettings.flash);
   const collection = $derived(collectionMap.get(gameSettings.collection) ?? allKanjiCollection);
 
   const filteredKanjis = $derived.by(() => {
     const collectionKanji = kanjis.filter((kanji) => collection.contains(kanji));
     return gameSettings.review
-      ? collectionKanji.filter((kanji) => state.state.badKanjis[kanji.literal] !== undefined)
+      ? collectionKanji.filter((kanji) => stateData.state.badKanjis[kanji.literal] !== undefined)
       : collectionKanji;
   });
 
   const currentIndex = localStore('flash-currentIndex', -1);
-  const currentFace = localStore('flash-currentFace', 'kanji');
+  const currentFace: LocalStore<'kanji' | 'meaning' | 'info'> = localStore(
+    'flash-currentFace',
+    'kanji'
+  );
   const currentKanji: Kanji | undefined = $derived(filteredKanjis[currentIndex.value]);
 
   const onReveal = () => {
@@ -32,39 +36,41 @@
 
   const onNext = (isBad: boolean) => {
     if (isBad && currentKanji) {
-      if (state.state.badKanjis[currentKanji.literal] !== undefined) {
-        state.state.badKanjis[currentKanji.literal] -= 1;
+      if (stateData.state.badKanjis[currentKanji.literal] !== undefined) {
+        stateData.state.badKanjis[currentKanji.literal] -= 1;
       } else {
-        state.state.badKanjis[currentKanji.literal] = -2;
+        stateData.state.badKanjis[currentKanji.literal] = -2;
       }
     } else if (currentKanji) {
-      if (state.state.badKanjis[currentKanji.literal] !== undefined) {
-        state.state.badKanjis[currentKanji.literal] += 1;
-        if (state.state.badKanjis[currentKanji.literal] >= 0) {
-          delete state.state.badKanjis[currentKanji.literal];
+      if (stateData.state.badKanjis[currentKanji.literal] !== undefined) {
+        stateData.state.badKanjis[currentKanji.literal] += 1;
+        if (stateData.state.badKanjis[currentKanji.literal] >= 0) {
+          delete stateData.state.badKanjis[currentKanji.literal];
         }
       }
     }
 
     currentIndex.value = Math.floor(Math.random() * filteredKanjis.length);
-    currentFace.value = Math.random() < 0.5 ? 'kanji' : 'meanings';
+    currentFace.value =
+      gameSettings.mode === 'kanjiAndMeaning'
+        ? Math.random() < 0.5
+          ? 'kanji'
+          : 'meaning'
+        : gameSettings.mode;
   };
 
   $effect(() => {
     if (currentIndex.value === -1 || !currentKanji) {
       onNext(false);
+    } else if (
+      (currentFace.value === 'kanji' && gameSettings.mode === 'meaning') ||
+      (currentFace.value === 'meaning' && gameSettings.mode === 'kanji')
+    ) {
+      currentFace.value = gameSettings.mode;
     }
   });
 
   const fontClass = $derived(settings.settings.font);
-  const keyword = $derived(currentKanji?.rtk?.keyword);
-  const meanings = $derived.by(() => {
-    if (!currentKanji) return '';
-    if (!keyword) return currentKanji.meanings.join(', ');
-    const notRtkMeanings = currentKanji.meanings.filter((m) => m !== keyword);
-    const str = notRtkMeanings.join(', ');
-    return notRtkMeanings.length === 0 ? str : `, ${str}`;
-  });
 </script>
 
 <div class="flex flex-col items-center gap-4">
@@ -81,10 +87,8 @@
       <div class="absolute bottom-5 left-5 right-5 flex justify-center">
         <Button onclick={onReveal} class="grow">Reveal</Button>
       </div>
-    {:else if currentFace.value === 'meanings'}
-      <p class="text-xl text-center">
-        {#if keyword}<span class="underline">{keyword}</span>{/if}{meanings}
-      </p>
+    {:else if currentFace.value === 'meaning'}
+      <KanjiMeanings kanji={currentKanji} />
       <div class="grow"></div>
       <div class="absolute bottom-5 left-5 right-5 flex justify-center">
         <Button onclick={onReveal} class="grow">Reveal</Button>
@@ -95,7 +99,7 @@
       </p>
       <div class="grow"></div>
       <p class="text-xl text-center">
-        {#if keyword}<span class="underline">{keyword}</span>{/if}{meanings}
+        <KanjiMeanings kanji={currentKanji} />
       </p>
       <div class="grid" style="grid-template-columns: min-content 1fr;">
         <p class="text-xl mr-2">On:</p>
