@@ -1,4 +1,4 @@
-import { allKanjiCollection } from '$lib/collection.svelte';
+import { jouyouKanjiCollection } from '$lib/collection.svelte';
 
 export type FlashSettings = {
   collection: string;
@@ -8,16 +8,16 @@ export type FlashSettings = {
 
 export type FlashState = {
   currentIndex: number;
-  currentState: 'kanji' | 'meaning' | 'info';
+  currentFace: 'kanji' | 'meaning' | 'info';
 };
 
 export const defaultFlashSettings: FlashSettings = {
-  collection: allKanjiCollection.id,
+  collection: jouyouKanjiCollection.id,
   mode: 'kanjiAndMeaning',
   review: false
 };
 
 export const defaultFlashState: FlashState = {
   currentIndex: -1,
-  currentState: 'kanji'
+  currentFace: 'kanji'
 };

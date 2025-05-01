@@ -5,7 +5,7 @@ import type { PageLoad } from './$types';
 export const load: PageLoad = async ({ params, fetch }) => {
   const kanjis = await fetch(`${base}/kanji.json`);
   const json: Kanji[] = await kanjis.json();
-  const kanji = json.find((k) => k.literal === params.slug);
+  const kanji = json.find((k) => k.l === params.slug);
 
   return {
     kanji: kanji

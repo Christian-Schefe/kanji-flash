@@ -19,9 +19,16 @@ export const properKanjiCollection: KanjiCollection = {
   name: 'Proper Kanji',
   description: 'All kanji in the database that have an assigned meaning and at least one reading.',
   contains: (kanji: Kanji) => {
-    return (
-      kanji.meanings.length > 0 && (kanji.kunReadings.length > 0 || kanji.onReadings.length > 0)
-    );
+    return kanji.m.length > 0 && (kanji.k.length > 0 || kanji.o.length > 0);
+  }
+};
+
+export const jouyouKanjiCollection: KanjiCollection = {
+  id: 'jouyou_kanji',
+  name: 'Jouyou Kanji',
+  description: 'The 2136 jouyou kanji, as defined by the Japanese government.',
+  contains: (kanji: Kanji) => {
+    return kanji.g !== null && kanji.g <= 6;
   }
 };
 
@@ -30,21 +37,14 @@ const jlptCollection = (grade: number, name: string, id?: string) => ({
   name: `JLPT ${name}`,
   description: `The kanji from the JLPT ${name} level.`,
   contains: (kanji: Kanji) => {
-    return kanji.jlpt === grade;
+    return kanji.j === grade;
   }
 });
 
 export const collections: KanjiCollection[] = [
   allKanjiCollection,
   properKanjiCollection,
-  {
-    id: 'jouyou_kanji',
-    name: 'Jouyou Kanji',
-    description: 'The 2136 jouyou kanji, as defined by the Japanese government.',
-    contains: (kanji: Kanji) => {
-      return kanji.grade !== null && kanji.grade <= 6;
-    }
-  },
+  jouyouKanjiCollection,
   jlptCollection(1, 'N1'),
   jlptCollection(2, 'N2 - N3', 'N2_N3'),
   jlptCollection(3, 'N4'),

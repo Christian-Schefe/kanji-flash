@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
   import { ArrowLeftOutline } from 'flowbite-svelte-icons';
+  import { goto } from '$app/navigation';
 
   type Props = {
     title?: string;
@@ -8,14 +9,27 @@
     children?: Snippet<[]>;
   };
   const { title, children, backHref }: Props = $props();
+
+  const prevHref = () => {
+    if (backHref) {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        goto(backHref, { replaceState: true });
+      }
+    }
+  };
 </script>
 
 <div class="flex flex-col p-2">
   <div class="relative flex justify-center mb-4">
     {#if backHref}
-      <a href={backHref} class="h-full w-8 absolute left-0 flex items-center justify-center">
+      <button
+        onclick={prevHref}
+        class="h-full w-8 absolute left-0 flex items-center justify-center"
+      >
         <ArrowLeftOutline size="lg" />
-      </a>
+      </button>
     {/if}
     {#if title}
       <h1 class="align-middle text-2xl text-black dark:text-white">{title}</h1>

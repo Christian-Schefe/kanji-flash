@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { allKanjiCollection, collections } from '$lib/collection.svelte';
+  import { collections } from '$lib/collection.svelte';
   import { settings, stateData } from '$lib/settings.svelte';
   import { Label, Select, Toggle } from 'flowbite-svelte';
+  import { defaultFlashState } from './FlashSettings';
 
   type Props = {
     applySettings: () => void;
@@ -20,16 +21,16 @@
     { value: 'meaning', name: 'Meaning' }
   ];
 
-  let collection = $state(
-    settings.settings.gameModeSettings.flash.collection ?? allKanjiCollection.id
-  );
-  let mode = $state(settings.settings.gameModeSettings.flash.mode ?? 'kanjiAndMeaning');
-  let isReview = $state(settings.settings.gameModeSettings.flash.review ?? false);
+  let collection = $state(settings.settings.gameModeSettings.flash.collection);
+  let mode = $state(settings.settings.gameModeSettings.flash.mode);
+  let isReview = $state(settings.settings.gameModeSettings.flash.review);
 
   applySettings = () => {
     settings.settings.gameModeSettings.flash.collection = collection;
     settings.settings.gameModeSettings.flash.mode = mode;
     settings.settings.gameModeSettings.flash.review = isReview;
+
+    stateData.state.gameModeState.flash = defaultFlashState;
   };
 </script>
 

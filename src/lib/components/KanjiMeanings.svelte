@@ -8,11 +8,11 @@
 
   const { kanji, pClass }: Props = $props();
 
-  const keyword = $derived(kanji?.rtk?.keyword);
+  const keyword = $derived(kanji?.r?.k);
   const meanings = $derived.by(() => {
     if (!kanji) return '';
-    if (!keyword) return kanji.meanings.join(', ');
-    const notRtkMeanings = kanji.meanings.filter((m) => m !== keyword);
+    if (!keyword) return kanji.m.join(', ');
+    const notRtkMeanings = kanji.m.filter((m) => m !== keyword);
     const str = notRtkMeanings.join(', ');
     return notRtkMeanings.length === 0 ? str : `, ${str}`;
   });

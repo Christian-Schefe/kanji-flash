@@ -54,11 +54,11 @@ export const addRtkInfo = (csv: string, kanjis: Kanji[]) => {
 	validateInfo(rtkInfo);
 	console.log(rtkInfo.size);
 	for (const kanji of kanjis) {
-		const rtk = rtkInfo.get(kanji.literal);
+		const rtk = rtkInfo.get(kanji.l);
 		if (rtk) {
-			kanji.rtk = {
-				keyword: rtk.keyword,
-				index: rtk.index,
+			kanji.r = {
+				k: rtk.keyword,
+				i: rtk.index,
 			};
 		}
 	}

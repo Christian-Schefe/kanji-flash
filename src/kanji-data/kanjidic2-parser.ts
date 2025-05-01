@@ -32,19 +32,19 @@ const extractKanji = (char: any): Kanji => {
 	const meanings = asArray(rmgroup.meaning);
 
 	return {
-		literal: char.literal,
-		strokes: Number.parseInt(asArray(misc.stroke_count)[0]) || 0,
-		frequency: misc.freq !== undefined ? Number.parseInt(misc.freq) : null,
-		jlpt: misc.jlpt !== undefined ? Number.parseInt(misc.jlpt) : null,
-		grade: misc.grade !== undefined ? Number.parseInt(misc.grade) : null,
-		rtk: null,
-		meanings: meanings
+		l: char.literal,
+		s: Number.parseInt(asArray(misc.stroke_count)[0]) || 0,
+		f: misc.freq !== undefined ? Number.parseInt(misc.freq) : null,
+		j: misc.jlpt !== undefined ? Number.parseInt(misc.jlpt) : null,
+		g: misc.grade !== undefined ? Number.parseInt(misc.grade) : null,
+		r: null,
+		m: meanings
 			.filter((m) => !m.m_lang || m.m_lang === "en")
 			.map((m) => m["#text"] || m),
-		kunReadings: readings
+		k: readings
 			.filter((r) => r.r_type === "ja_kun")
 			.map((r) => r["#text"] || r),
-		onReadings: readings
+		o: readings
 			.filter((r) => r.r_type === "ja_on")
 			.map((r) => r["#text"] || r),
 	};

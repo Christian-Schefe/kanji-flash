@@ -1,9 +1,7 @@
 <script lang="ts">
   import { allKanjiCollection, collectionMap } from '$lib/collection.svelte';
   import { Button, ButtonGroup } from 'flowbite-svelte';
-  import type { Kanji } from '../../kanji-data/types';
-  import type { FlashSettings } from './FlashSettings';
-  import { LocalStore, localStore } from '$lib/localStorage.svelte';
+  import type { Kanji } from '../../../kanji-data/types';
   import { settings, stateData } from '$lib/settings.svelte';
   import KanjiMeanings from '$lib/components/KanjiMeanings.svelte';
 
@@ -19,39 +17,35 @@
   const filteredKanjis = $derived.by(() => {
     const collectionKanji = kanjis.filter((kanji) => collection.contains(kanji));
     return gameSettings.review
-      ? collectionKanji.filter((kanji) => stateData.state.badKanjis[kanji.literal] !== undefined)
+      ? collectionKanji.filter((kanji) => stateData.state.badKanjis[kanji.l] !== undefined)
       : collectionKanji;
   });
 
-  const currentIndex = localStore('flash-currentIndex', -1);
-  const currentFace: LocalStore<'kanji' | 'meaning' | 'info'> = localStore(
-    'flash-currentFace',
-    'kanji'
-  );
-  const currentKanji: Kanji | undefined = $derived(filteredKanjis[currentIndex.value]);
+  const gameState = stateData.state.gameModeState.flash;
+  const currentKanji: Kanji | undefined = $derived(filteredKanjis[gameState.currentIndex]);
 
   const onReveal = () => {
-    currentFace.value = 'info';
+    gameState.currentFace = 'info';
   };
 
   const onNext = (isBad: boolean) => {
     if (isBad && currentKanji) {
-      if (stateData.state.badKanjis[currentKanji.literal] !== undefined) {
-        stateData.state.badKanjis[currentKanji.literal] -= 1;
+      if (stateData.state.badKanjis[currentKanji.l] !== undefined) {
+        stateData.state.badKanjis[currentKanji.l] -= 1;
       } else {
-        stateData.state.badKanjis[currentKanji.literal] = -2;
+        stateData.state.badKanjis[currentKanji.l] = -2;
       }
     } else if (currentKanji) {
-      if (stateData.state.badKanjis[currentKanji.literal] !== undefined) {
-        stateData.state.badKanjis[currentKanji.literal] += 1;
-        if (stateData.state.badKanjis[currentKanji.literal] >= 0) {
-          delete stateData.state.badKanjis[currentKanji.literal];
+      if (stateData.state.badKanjis[currentKanji.l] !== undefined) {
+        stateData.state.badKanjis[currentKanji.l] += 1;
+        if (stateData.state.badKanjis[currentKanji.l] >= 0) {
+          delete stateData.state.badKanjis[currentKanji.l];
         }
       }
     }
 
-    currentIndex.value = Math.floor(Math.random() * filteredKanjis.length);
-    currentFace.value =
+    gameState.currentIndex = Math.floor(Math.random() * filteredKanjis.length);
+    gameState.currentFace =
       gameSettings.mode === 'kanjiAndMeaning'
         ? Math.random() < 0.5
           ? 'kanji'
@@ -60,13 +54,13 @@
   };
 
   $effect(() => {
-    if (currentIndex.value === -1 || !currentKanji) {
+    if (gameState.currentIndex === -1 || !currentKanji) {
       onNext(false);
     } else if (
-      (currentFace.value === 'kanji' && gameSettings.mode === 'meaning') ||
-      (currentFace.value === 'meaning' && gameSettings.mode === 'kanji')
+      (gameState.currentFace === 'kanji' && gameSettings.mode === 'meaning') ||
+      (gameState.currentFace === 'meaning' && gameSettings.mode === 'kanji')
     ) {
-      currentFace.value = gameSettings.mode;
+      gameState.currentFace = gameSettings.mode;
     }
   });
 
@@ -80,22 +74,22 @@
     <p class="text-2xl text-center">Invalid kanji.</p>
   {/if}
   {#if currentKanji !== undefined}
-    {#if currentFace.value === 'kanji'}
+    {#if gameState.currentFace === 'kanji'}
       <p class="text-8xl {fontClass}">
-        {currentKanji.literal}
+        {currentKanji.l}
       </p>
-      <div class="absolute bottom-5 left-5 right-5 flex justify-center">
+      <div class="absolute bottom-5 w-full flex justify-center max-w-6xl px-5">
         <Button onclick={onReveal} class="grow">Reveal</Button>
       </div>
-    {:else if currentFace.value === 'meaning'}
+    {:else if gameState.currentFace === 'meaning'}
       <KanjiMeanings kanji={currentKanji} />
       <div class="grow"></div>
-      <div class="absolute bottom-5 left-5 right-5 flex justify-center">
+      <div class="absolute bottom-5 w-full flex justify-center max-w-6xl px-5">
         <Button onclick={onReveal} class="grow">Reveal</Button>
       </div>
-    {:else if currentFace.value === 'info'}
+    {:else if gameState.currentFace === 'info'}
       <p class="text-8xl {fontClass}">
-        {currentKanji.literal}
+        {currentKanji.l}
       </p>
       <div class="grow"></div>
       <p class="text-xl text-center">
@@ -103,11 +97,11 @@
       </p>
       <div class="grid" style="grid-template-columns: min-content 1fr;">
         <p class="text-xl mr-2">On:</p>
-        <p class="text-xl {fontClass}">{currentKanji.onReadings.join(', ')}</p>
+        <p class="text-xl {fontClass}">{currentKanji.o.join(', ')}</p>
         <p class="text-xl mr-2">Kun:</p>
-        <p class="text-xl {fontClass}">{currentKanji.kunReadings.join(', ')}</p>
+        <p class="text-xl {fontClass}">{currentKanji.k.join(', ')}</p>
       </div>
-      <div class="absolute bottom-5 left-5 right-5 flex justify-center">
+      <div class="absolute bottom-5 w-full flex justify-center max-w-6xl px-5">
         <ButtonGroup class="grow">
           <Button size="md" color="red" onclick={() => onNext(true)} class="grow">Bad</Button>
           <Button size="md" color="green" onclick={() => onNext(false)} class="grow">Good</Button>

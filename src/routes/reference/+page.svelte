@@ -77,18 +77,18 @@
       const a = reverse.value ? y : x;
       const b = reverse.value ? x : y;
       const inf = Number.POSITIVE_INFINITY;
-      const tiebreaker = a.literal.localeCompare(b.literal);
+      const tiebreaker = a.l.localeCompare(b.l);
       switch (sortBy.value) {
         case 'literal':
           return tiebreaker;
         case 'frequency':
-          return (a.frequency ?? inf) - (b.frequency ?? inf) || tiebreaker;
+          return (a.f ?? inf) - (b.f ?? inf) || tiebreaker;
         case 'grade':
-          return (a.grade ?? inf) - (b.grade ?? inf) || tiebreaker;
+          return (a.g ?? inf) - (b.g ?? inf) || tiebreaker;
         case 'jlpt':
-          return (b.jlpt ?? 0) - (a.jlpt ?? 0) || tiebreaker;
+          return (b.j ?? 0) - (a.j ?? 0) || tiebreaker;
         case 'strokes':
-          return (a.strokes ?? 0) - (b.strokes ?? 0) || tiebreaker;
+          return (a.s ?? 0) - (b.s ?? 0) || tiebreaker;
         default:
           return tiebreaker;
       }
@@ -107,16 +107,16 @@
     return sortedKanjis.filter((kanji) => {
       return (
         collectionFilter(kanji) &&
-        gradeFilterFunc(kanji.grade) &&
+        gradeFilterFunc(kanji.g) &&
         (searchTerm.value.length === 0 ||
-          stringFilter(kanji.literal, false) ||
+          stringFilter(kanji.l, false) ||
           (searchMeaning.value &&
-            (kanji.meanings.some((meaning) => stringFilter(meaning, false)) ||
-              (kanji.rtk && stringFilter(kanji.rtk.keyword, false)))) ||
+            (kanji.m.some((meaning) => stringFilter(meaning, false)) ||
+              (kanji.r && stringFilter(kanji.r.k, false)))) ||
           (searchOn.value &&
-            kanji.onReadings.some((reading) => stringFilter(wanakana.toHiragana(reading), true))) ||
+            kanji.o.some((reading) => stringFilter(wanakana.toHiragana(reading), true))) ||
           (searchKun.value &&
-            kanji.kunReadings.some((reading) => stringFilter(reading.replace('.', ''), true))))
+            kanji.k.some((reading) => stringFilter(reading.replace('.', ''), true))))
       );
     });
   });
@@ -218,13 +218,13 @@
       >
         {#each pageKanjis as kanji}
           <a
-            href="{base}/reference/{kanji.literal}"
+            href="{base}/reference/{kanji.l}"
             style="width: {elementSize - elementMargin}px; height: {elementSize -
               elementMargin}px; margin: {elementMargin / 2}px;
               font-size: {elementSize / 1.5 - 10}px;"
-            class="{fontClass} p-1 outline outline-gray-300 dark:outline-gray-700 rounded-lg text-center hover:outline-blue-400 active:bg-blue-100"
+            class="{fontClass} p-1 outline outline-gray-300 dark:outline-gray-700 rounded-lg text-center hover:outline-blue-400 active:bg-blue-100 dark:active:bg-blue-900"
           >
-            {kanji.literal}
+            {kanji.l}
           </a>
         {/each}
       </div>
