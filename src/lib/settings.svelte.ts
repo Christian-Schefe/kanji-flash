@@ -18,6 +18,7 @@ export type GameMode = 'none' | 'flash' | 'timeAttack';
 type Settings = {
   settings: {
     font: string;
+    showStrokeOrder: boolean;
     gameModeSettings: {
       none: null;
       flash: FlashSettings;
@@ -42,6 +43,7 @@ type State = {
 
 const defaultSettings: Settings['settings'] = {
   font: 'noto-sans-jp',
+  showStrokeOrder: true,
   gameModeSettings: {
     none: null,
     flash: defaultFlashSettings,

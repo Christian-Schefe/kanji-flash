@@ -9,6 +9,7 @@
   import { allKanjiCollection, collectionMap } from '$lib/collection.svelte';
   import * as wanakana from 'wanakana';
   import { settings } from '$lib/settings.svelte';
+  import KanjiIcon from '$lib/components/KanjiIcon.svelte';
 
   const { data }: PageProps = $props();
   const { kanjis } = data;
@@ -217,15 +218,7 @@
         style="grid-template-columns: repeat({columns}, 1fr); width: {gridWidth}px;"
       >
         {#each pageKanjis as kanji}
-          <a
-            href="{base}/reference/{kanji.l}"
-            style="width: {elementSize - elementMargin}px; height: {elementSize -
-              elementMargin}px; margin: {elementMargin / 2}px;
-              font-size: {elementSize / 1.5 - 10}px;"
-            class="{fontClass} p-1 outline outline-gray-300 dark:outline-gray-700 rounded-lg text-center hover:outline-blue-400 active:bg-blue-100 dark:active:bg-blue-900"
-          >
-            {kanji.l}
-          </a>
+          <KanjiIcon literal={kanji.l} size={elementSize} margin={elementMargin} />
         {/each}
       </div>
     {/if}

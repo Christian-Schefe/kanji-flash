@@ -24,7 +24,51 @@
     'Jinmeiyou'
   ][data.kanji?.g ?? 0];
 
+  let svgString: string | null = $state(null);
+
+  const processSvg = (svg: string) => {
+    const startIndex = svg.indexOf('<svg');
+    return svg
+      .slice(startIndex)
+      .replace(/<g id="kvg:StrokePaths[^>]+>/g, (match) => {
+        return match.replace('>', "class='stroke-current'>");
+      })
+      .replace(/<g id="kvg:StrokeNumbers[^>]+>/g, (match) => {
+        return match.replace('>', "class='fill-current'>");
+      })
+      .replace(/<g id="kvg:StrokePaths[^>]+>/g, (match) => {
+        return match.replace(/stroke:[^;"]+;*/, '');
+      })
+      .replace(/<g id="kvg:StrokeNumbers[^>]+>/g, (match) => {
+        return match.replace(/fill:[^"]+;*/, '');
+      });
+  };
+
+  const checkSvgExists = async () => {
+    if (!settings.settings.showStrokeOrder) {
+      svgString = null;
+      return;
+    }
+    try {
+      const res = await fetch(svgUrl);
+      svgString = res.ok ? processSvg(await res.text()) : null;
+    } catch {
+      return false;
+    }
+  };
+
   const fontClass = $derived(settings.settings.font);
+
+  const kanjiCodepoint = $derived(
+    data.kanji?.l.codePointAt(0)?.toString(16).toLowerCase().padStart(5, '0') ?? '00000'
+  );
+  const svgUrl = $derived(
+    `https://raw.githubusercontent.com/KanjiVG/kanjivg/84a317ec30c3c799aa92064bc00a29011b8d14a7/kanji/${kanjiCodepoint}.svg`
+  );
+
+  $effect(() => {
+    checkSvgExists();
+  });
 </script>
 
 {#if data.kanji != null}
@@ -65,6 +109,14 @@
             </div>
           </div>
         </div>
+        {#if svgString !== null}
+          <div class="flex flex-col w-full items-center mt-4">
+            <p class="text-xl font-bold">Stroke Order</p>
+            <svg class="max-w-64" viewBox="0 0 109 109" xmlns="http://www.w3.org/2000/svg">
+              {@html svgString}
+            </svg>
+          </div>
+        {/if}
       </Card>
     </div>
   </PageBody>

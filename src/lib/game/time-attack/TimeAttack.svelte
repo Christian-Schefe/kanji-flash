@@ -9,6 +9,7 @@
   import * as wanakana from 'wanakana';
   import type { Kanji } from '../../../kanji-data/types';
   import { defaultTimeAttackState } from './TimeAttackSettings';
+  import KanjiIcon from '$lib/components/KanjiIcon.svelte';
 
   type Props = {
     kanjis: Kanji[];
@@ -106,6 +107,10 @@
   });
 
   const onEnd = () => {
+    if (gameState.done) return;
+    if (currentKanji !== undefined) {
+      gameState.kanjis.push({ kanji: currentKanji.l, solved: false });
+    }
     gameState.done = true;
   };
 
@@ -212,14 +217,7 @@
       <p class="text-xl text-center">Answered Kanjis</p>
       <div class="grid grid-cols-4 gap-2">
         {#each gameState.kanjis as kanji}
-          <a
-            href={`${base}/reference/${kanji.kanji}`}
-            class="text-2xl flex justify-center items-center rounded-lg outline outline-gray-300 dark:outline-gray-700 w-12 h-12 {kanji.solved
-              ? ''
-              : 'text-primary-700 dark:text-primary-600'} hover:outline-blue-400 active:bg-blue-100 dark:active:bg-blue-900"
-          >
-            <p class="">{kanji.kanji}</p>
-          </a>
+          <KanjiIcon redText={!kanji.solved} literal={kanji.kanji} size={64} margin={8} />
         {/each}
       </div>
     </div>
