@@ -10,6 +10,7 @@
   import type { Kanji } from '../../../kanji-data/types';
   import { defaultTimeAttackState } from './TimeAttackSettings';
   import KanjiIcon from '$lib/components/KanjiIcon.svelte';
+  import { on } from 'svelte/events';
 
   type Props = {
     kanjis: Kanji[];
@@ -62,13 +63,14 @@
   };
 
   const onSkip = () => {
-    if (gameState.done) return;
-    if (currentKanji !== undefined) {
-      gameState.kanjis.push({ kanji: currentKanji.l, solved: false });
-    }
+    if (gameState.done || solution) return;
     inputVal = '';
     solution = true;
     setTimeout(() => {
+      if (gameState.done) return;
+      if (currentKanji !== undefined) {
+        gameState.kanjis.push({ kanji: currentKanji.l, solved: false });
+      }
       onNext();
     }, 2000);
   };
@@ -79,23 +81,23 @@
       return;
     }
     if (gameSettings.mode === 'onyomi') {
-      inputVal = wanakana.toHiragana(inputVal, { IMEMode: true });
+      if (gameSettings.onyomi.autoHiragana) {
+        inputVal = wanakana.toHiragana(inputVal, { IMEMode: true });
+      }
 
-      if (currentKanji.o.some((reading) => wanakana.toHiragana(reading) === inputVal)) {
+      const inputValHiragana = wanakana.toHiragana(inputVal);
+      if (currentKanji.o.some((reading) => wanakana.toHiragana(reading) === inputValHiragana)) {
         gameState.score += 1;
         gameState.kanjis.push({ kanji: currentKanji.l, solved: true });
         onNext();
       }
     } else if (gameSettings.mode === 'meaning') {
-      if (currentKanji.m.some((meaning) => meaning.toLowerCase() === inputVal.toLowerCase())) {
+      const inputValLowercase = inputVal.toLowerCase();
+      if (currentKanji.m.some((meaning) => meaning.toLowerCase() === inputValLowercase)) {
         gameState.score += 1;
         gameState.kanjis.push({ kanji: currentKanji.l, solved: true });
         onNext();
       }
-    }
-
-    if (inputVal === 'qqqq') {
-      onEnd();
     }
   });
 
@@ -119,7 +121,7 @@
       stateData.state.gameMode = 'none';
       goto(`${base}/play`);
     } else {
-      stateData.state.gameModeState.timeAttack = defaultTimeAttackState;
+      stateData.state.gameModeState.timeAttack = defaultTimeAttackState();
       timePlayed = gameState.timePlayed;
       startGame();
       onNext();
@@ -177,6 +179,20 @@
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
   const timeLeftString = $derived(timeString(timeLeft));
+
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      if (inputVal === 's') {
+        onSkip();
+      }
+      if (inputVal === 'q') {
+        onEnd();
+      }
+    }
+    if (gameSettings.backspaceClear && e.key === 'Backspace') {
+      inputVal = '';
+    }
+  };
 </script>
 
 <div class="flex flex-col items-center gap-4">
@@ -187,16 +203,36 @@
       <Progressbar progress={(timePlayed * 100) / gameSettings.time} />
       <p>{timeLeftString}</p>
     </div>
-    <p class="text-8xl {fontClass}">
-      {currentKanji.l}
-    </p>
+    {#if gameSettings.mode === 'onyomi' && gameSettings.onyomi.showMeaning}
+      <KanjiMeanings kanji={currentKanji} />
+    {/if}
+    {#if gameSettings.mode !== 'onyomi' || gameSettings.onyomi.showKanji}
+      <p class="text-8xl {fontClass}">
+        {currentKanji.l}
+      </p>
+    {/if}
     <div class="w-full max-w-48">
-      <Input type="text" bind:value={inputVal} id="input" autocomplete="off" disabled={solution} />
+      <Input
+        type="text"
+        bind:value={inputVal}
+        id="input"
+        autocomplete="off"
+        disabled={solution}
+        onkeydown={onKeyDown}
+      />
     </div>
     <Button onclick={onSkip}>Skip</Button>
     {#if solution}
       {#if gameSettings.mode === 'onyomi'}
-        <p class="text-2xl text-center">Onyomi: {currentKanji.o.join(', ')}</p>
+        {#if !gameSettings.onyomi.showKanji}
+          <p class="text-8xl {fontClass}">
+            {currentKanji.l}
+          </p>
+        {/if}
+        {#if !gameSettings.onyomi.showMeaning}
+          <KanjiMeanings kanji={currentKanji} />
+        {/if}
+        <p class="text-2xl text-center">On: {currentKanji.o.join(', ')}</p>
       {:else if gameSettings.mode === 'meaning'}
         <KanjiMeanings kanji={currentKanji} />
       {/if}
@@ -215,9 +251,9 @@
         <Button class="min-w-32" onclick={() => onFinish(false)}>Leave</Button>
       </ButtonGroup>
       <p class="text-xl text-center">Answered Kanjis</p>
-      <div class="grid grid-cols-4 gap-2">
+      <div class="grid grid-cols-5">
         {#each gameState.kanjis as kanji}
-          <KanjiIcon redText={!kanji.solved} literal={kanji.kanji} size={64} margin={8} />
+          <KanjiIcon redText={!kanji.solved} literal={kanji.kanji} size={52} margin={8} />
         {/each}
       </div>
     </div>

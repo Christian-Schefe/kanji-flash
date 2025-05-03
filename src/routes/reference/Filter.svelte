@@ -68,7 +68,7 @@
   }));
 </script>
 
-<div class="flex gap-2 flex-row">
+<div class="flex gap-2 flex-row mt-4">
   <Button><FilterOutline /></Button>
   <Dropdown class="min-w-96">
     <DropdownItem

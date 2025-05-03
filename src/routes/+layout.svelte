@@ -8,7 +8,7 @@
   mountSettings();
 </script>
 
-<div class="w-full max-w-6xl mx-auto flex flex-col">
+<div class="w-full flex flex-col">
   <NavBar
     title="Kanji Flash"
     pages={[
@@ -18,5 +18,7 @@
       { name: 'Settings', href: 'settings' }
     ]}
   />
-  {@render children()}
+  <div class="w-full max-w-6xl mx-auto flex flex-col">
+    {@render children()}
+  </div>
 </div>

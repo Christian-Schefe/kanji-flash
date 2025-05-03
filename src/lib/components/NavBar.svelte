@@ -1,7 +1,7 @@
 <script lang="ts">
   import { base } from '$app/paths';
   import { page } from '$app/state';
-  import { Navbar, NavBrand, NavHamburger, NavLi, NavUl } from 'flowbite-svelte';
+  import { DarkMode, Navbar, NavBrand, NavHamburger, NavLi, NavUl } from 'flowbite-svelte';
 
   type NavLink = {
     name: string;
@@ -20,11 +20,14 @@
   });
 </script>
 
-<Navbar>
+<Navbar navContainerClass="max-w-6xl" class="border-b border-gray-200 dark:border-gray-700">
   <NavBrand href="{base}/">
     <span class="self-center whitespace-nowrap text-xl font-semibold">{title}</span>
   </NavBrand>
-  <NavHamburger />
+  <div class="flex md:order-2">
+    <DarkMode />
+    <NavHamburger />
+  </div>
   <NavUl {activeUrl} slideParams={{ delay: 0, duration: 300 }}>
     {#each pages as { name, href }}
       <NavLi href="{base}/{href}">{name}</NavLi>

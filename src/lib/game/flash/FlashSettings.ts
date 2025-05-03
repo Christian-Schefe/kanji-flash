@@ -11,13 +11,13 @@ export type FlashState = {
   currentFace: 'kanji' | 'meaning' | 'info';
 };
 
-export const defaultFlashSettings: FlashSettings = {
+export const defaultFlashSettings: () => FlashSettings = () => ({
   collection: jouyouKanjiCollection.id,
   mode: 'kanjiAndMeaning',
   review: false
-};
+});
 
-export const defaultFlashState: FlashState = {
+export const defaultFlashState: () => FlashState = () => ({
   currentIndex: -1,
   currentFace: 'kanji'
-};
+});

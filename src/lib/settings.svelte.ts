@@ -41,40 +41,40 @@ type State = {
   };
 };
 
-const defaultSettings: Settings['settings'] = {
+const defaultSettings: () => Settings['settings'] = () => ({
   font: 'noto-sans-jp',
   showStrokeOrder: true,
   gameModeSettings: {
     none: null,
-    flash: defaultFlashSettings,
-    timeAttack: defaultTimeAttackSettings
+    flash: defaultFlashSettings(),
+    timeAttack: defaultTimeAttackSettings()
   }
-};
+});
 
-const defaultState: State['state'] = {
+const defaultState: () => State['state'] = () => ({
   badKanjis: {},
   gameMode: 'none',
   gameModeState: {
     none: null,
-    flash: defaultFlashState,
-    timeAttack: defaultTimeAttackState
+    flash: defaultFlashState(),
+    timeAttack: defaultTimeAttackState()
   }
-};
+});
 
 export const settings: Settings = $state({
-  settings: defaultSettings
+  settings: defaultSettings()
 });
 
 export const stateData: State = $state({
-  state: defaultState
+  state: defaultState()
 });
 
 let hasSettingsLoaded = false;
 let hasStateLoaded = false;
 
 export const resetSettings = () => {
-  settings.settings = defaultSettings;
-  stateData.state = defaultState;
+  settings.settings = defaultSettings();
+  stateData.state = defaultState();
 };
 
 export const mountSettings = () => {
@@ -83,8 +83,8 @@ export const mountSettings = () => {
   $effect(() => {
     if (!hasSettingsLoaded) {
       settings.settings = browser
-        ? JSON.parse(localStorage.getItem(settingsKey) ?? 'null') || defaultSettings
-        : defaultSettings;
+        ? JSON.parse(localStorage.getItem(settingsKey) ?? 'null') || defaultSettings()
+        : defaultSettings();
 
       hasSettingsLoaded = true;
     }
@@ -93,8 +93,8 @@ export const mountSettings = () => {
   $effect(() => {
     if (!hasStateLoaded) {
       stateData.state = browser
-        ? JSON.parse(localStorage.getItem(stateKey) ?? 'null') || defaultState
-        : defaultState;
+        ? JSON.parse(localStorage.getItem(stateKey) ?? 'null') || defaultState()
+        : defaultState();
 
       hasStateLoaded = true;
     }

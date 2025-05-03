@@ -2,7 +2,7 @@
   import { base } from '$app/paths';
   import PageBody from '$lib/components/PageBody.svelte';
   import { resetSettings, settings } from '$lib/settings.svelte';
-  import { Button, DarkMode, Label, Modal, Select, Toggle } from 'flowbite-svelte';
+  import { Button, Card, DarkMode, Hr, Label, Modal, Select, Toggle } from 'flowbite-svelte';
   import { ExclamationCircleOutline } from 'flowbite-svelte-icons';
 
   const fonts = [
@@ -19,17 +19,16 @@
 
 <PageBody title="Settings" backHref="{base}/">
   <div class="flex flex-col items-center gap-4">
-    <DarkMode />
-    <div class="flex flex-col gap-4 items-center">
-      <div>
-        <Label>Font for Japanese characters</Label>
-        <Select items={fonts} bind:value={settings.settings.font}></Select>
+    <Hr classHr="w-[50%]" classDiv="sm:col-span-2">Visual</Hr>
+    <Card class="flex flex-col gap-4">
+      <Label>Font for Japanese characters</Label>
+      <Select items={fonts} bind:value={settings.settings.font}></Select>
+      <div class="flex gap-2 items-center">
+        <Toggle bind:checked={settings.settings.showStrokeOrder} />
+        <Label>Show Stroke Order SVGs</Label>
       </div>
-    </div>
-    <div class="flex gap-2 items-center">
-      <Toggle bind:checked={settings.settings.showStrokeOrder} />
-      <Label>Show Stroke Order SVGs</Label>
-    </div>
+    </Card>
+    <Hr classHr="w-[50%]" classDiv="sm:col-span-2">Danger Zone</Hr>
     <Button onclick={() => (popupModal = true)}>Delete All Data</Button>
     <Modal bind:open={popupModal} size="xs" autoclose>
       <div class="text-center">

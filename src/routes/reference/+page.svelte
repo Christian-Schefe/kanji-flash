@@ -18,7 +18,7 @@
   let pageIndexStore = localStore('page', 1, 'read');
   const pageIndex = $derived(pageIndexStore.value - 1);
 
-  const elementSize = 50;
+  const elementSize = 52;
   const elementMargin = 8;
 
   const columns = $derived(Math.floor(divWidth / elementSize));
@@ -169,8 +169,6 @@
     const newPageIndex = Math.min(Math.max(i, 0), pageCount - 1) + 1;
     goto(`${base}/reference?page=${newPageIndex}`);
   };
-
-  const fontClass = $derived(settings.settings.font);
 </script>
 
 <PageBody title="Reference">

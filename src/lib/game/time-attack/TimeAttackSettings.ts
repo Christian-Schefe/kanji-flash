@@ -4,6 +4,12 @@ export type TimeAttackSettings = {
   collection: string;
   mode: 'meaning' | 'onyomi';
   time: number;
+  backspaceClear: boolean;
+  onyomi: {
+    autoHiragana: boolean;
+    showMeaning: boolean;
+    showKanji: boolean;
+  };
 };
 
 export type TimeAttackState = {
@@ -14,16 +20,22 @@ export type TimeAttackState = {
   score: number;
 };
 
-export const defaultTimeAttackSettings: TimeAttackSettings = {
+export const defaultTimeAttackSettings: () => TimeAttackSettings = () => ({
   collection: jouyouKanjiCollection.id,
   mode: 'meaning',
+  backspaceClear: true,
+  onyomi: {
+    autoHiragana: false,
+    showMeaning: false,
+    showKanji: true
+  },
   time: 60
-};
+});
 
-export const defaultTimeAttackState: TimeAttackState = {
+export const defaultTimeAttackState: () => TimeAttackState = () => ({
   currentIndex: -1,
   done: false,
   timePlayed: 0,
   kanjis: [],
   score: 0
-};
+});

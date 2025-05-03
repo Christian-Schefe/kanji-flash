@@ -1,7 +1,7 @@
 <script lang="ts">
   import { collections } from '$lib/collection.svelte';
   import { settings, stateData } from '$lib/settings.svelte';
-  import { Label, Select } from 'flowbite-svelte';
+  import { Label, Select, Toggle } from 'flowbite-svelte';
   import { defaultTimeAttackState, type TimeAttackSettings } from './TimeAttackSettings';
 
   type Props = {
@@ -38,14 +38,34 @@
 
   let collection = $state(gameSettings.collection);
   let mode: TimeAttackSettings['mode'] = $state(gameSettings.mode);
+  let backspaceClear = $state(gameSettings.backspaceClear);
+  let autoHiragana = $state(gameSettings.onyomi.autoHiragana);
+  let showMeaning = $state(gameSettings.onyomi.showMeaning);
+  let showKanji = $state(!gameSettings.onyomi.showMeaning || gameSettings.onyomi.showKanji);
   let time = $state(gameSettings.time);
 
+  const onOnyomiSettingsChange = (changedKanji: boolean) => {
+    if (!showKanji && !showMeaning) {
+      if (changedKanji) {
+        showMeaning = true;
+      } else {
+        showKanji = true;
+      }
+    }
+  };
+
   applySettings = () => {
+    onOnyomiSettingsChange(false);
+
     gameSettings.collection = collection;
     gameSettings.mode = mode;
     gameSettings.time = time;
+    gameSettings.backspaceClear = backspaceClear;
+    gameSettings.onyomi.autoHiragana = autoHiragana;
+    gameSettings.onyomi.showMeaning = showMeaning;
+    gameSettings.onyomi.showKanji = showKanji;
 
-    stateData.state.gameModeState.timeAttack = defaultTimeAttackState;
+    stateData.state.gameModeState.timeAttack = defaultTimeAttackState();
   };
 </script>
 
@@ -56,4 +76,23 @@
   <Select bind:value={mode} items={modeItems} />
   <Label>Time</Label>
   <Select bind:value={time} items={timeItems} />
+  <div class="flex items-center gap-2">
+    <Toggle bind:checked={backspaceClear} />
+    <Label>Backspace Clear</Label>
+  </div>
+  {#if mode === 'onyomi'}
+    <Label>Onyomi Mode Settings</Label>
+    <div class="flex items-center gap-2">
+      <Toggle bind:checked={autoHiragana} />
+      <Label>Auto Hiragana</Label>
+    </div>
+    <div class="flex items-center gap-2">
+      <Toggle bind:checked={showMeaning} onchange={() => onOnyomiSettingsChange(false)} />
+      <Label>Show Meaning</Label>
+    </div>
+    <div class="flex items-center gap-2">
+      <Toggle bind:checked={showKanji} onchange={() => onOnyomiSettingsChange(true)} />
+      <Label>Show Kanji</Label>
+    </div>
+  {/if}
 </div>

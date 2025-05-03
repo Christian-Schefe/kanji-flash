@@ -21,7 +21,7 @@
   };
 </script>
 
-<div class="flex flex-col p-2">
+<div class="flex flex-col p-2 mt-2">
   <div class="relative flex justify-center mb-4">
     {#if backHref}
       <button

@@ -23,12 +23,30 @@ export const properKanjiCollection: KanjiCollection = {
   }
 };
 
+export const kyouikuKanjiCollection: KanjiCollection = {
+  id: 'kyouiku_kanji',
+  name: 'Kyouiku Kanji',
+  description: 'The 1026 kyouiku kanji.',
+  contains: (kanji: Kanji) => {
+    return kanji.g !== null && kanji.g > 0 && kanji.g <= 6;
+  }
+};
+
 export const jouyouKanjiCollection: KanjiCollection = {
   id: 'jouyou_kanji',
   name: 'Jouyou Kanji',
-  description: 'The 2136 jouyou kanji, as defined by the Japanese government.',
+  description: 'The 2136 kyouiku and jouyou kanji.',
   contains: (kanji: Kanji) => {
-    return kanji.g !== null && kanji.g <= 6;
+    return kanji.g !== null && kanji.g <= 8;
+  }
+};
+
+export const jinmeiyouKanjiCollection: KanjiCollection = {
+  id: 'jinmeiyou_kanji',
+  name: 'Jinmeiyou Kanji',
+  description: 'The 2999 kyouiku, jouyou and jinmeiyou kanji.',
+  contains: (kanji: Kanji) => {
+    return kanji.g !== null && kanji.g <= 10;
   }
 };
 
@@ -41,14 +59,25 @@ const jlptCollection = (grade: number, name: string, id?: string) => ({
   }
 });
 
-export const collections: KanjiCollection[] = [
-  allKanjiCollection,
-  properKanjiCollection,
+export const gradeCollections = [
+  kyouikuKanjiCollection,
   jouyouKanjiCollection,
-  jlptCollection(1, 'N1'),
-  jlptCollection(2, 'N2 - N3', 'N2_N3'),
+  jinmeiyouKanjiCollection
+];
+
+export const jlptCollections = [
+  jlptCollection(4, 'N5'),
   jlptCollection(3, 'N4'),
-  jlptCollection(4, 'N5')
+  jlptCollection(2, 'N2 - N3', 'N2_N3'),
+  jlptCollection(1, 'N1')
+];
+
+export const otherCollections = [allKanjiCollection, properKanjiCollection];
+
+export const collections: KanjiCollection[] = [
+  ...otherCollections,
+  ...gradeCollections,
+  ...jlptCollections
 ];
 
 export const collectionMap: Map<string, KanjiCollection> = new Map(

@@ -40,7 +40,7 @@
 </script>
 
 <PageBody title="Play">
-  <div class="flex flex-col items-center gap-4">
+  <div class="flex flex-col items-center gap-4 mt-4">
     {#if stateData.state.gameMode !== 'none'}
       <Card href={`${base}/play/game`}>
         <div class="flex flex-col gap-2">
