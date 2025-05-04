@@ -193,10 +193,10 @@
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
-      if (inputVal === 's') {
+      if (inputVal.toLowerCase() === 's') {
         onSkip();
       }
-      if (inputVal === 'q') {
+      if (inputVal.toLowerCase() === 'q') {
         onEnd();
       }
     }
