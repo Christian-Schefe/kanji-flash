@@ -10,7 +10,6 @@
   import type { Kanji } from '../../../kanji-data/types';
   import { defaultTimeAttackState } from './TimeAttackSettings';
   import KanjiIcon from '$lib/components/KanjiIcon.svelte';
-  import { on } from 'svelte/events';
 
   type Props = {
     kanjis: Kanji[];
@@ -39,6 +38,7 @@
   let lastTime = performance.now();
   // svelte-ignore state_referenced_locally
   let timePlayed = $state(gameState.timePlayed);
+  let prevInputVal = '';
 
   const doFocus = (timeout?: number) => {
     const doFocusInner = () => {
@@ -59,6 +59,9 @@
     gameState.currentIndex = Math.floor(Math.random() * filteredKanjis.length);
     inputVal = '';
     solution = false;
+    setTimeout(() => {
+      inputVal = '';
+    }, 1);
     doFocus(1);
   };
 
@@ -80,6 +83,14 @@
     if (solution || gameState.currentIndex === -1 || !currentKanji) {
       return;
     }
+
+    if (inputVal.length < prevInputVal.length) {
+      if (gameSettings.backspaceClear) {
+        inputVal = '';
+      }
+    }
+    prevInputVal = inputVal;
+
     if (gameSettings.mode === 'onyomi') {
       if (gameSettings.onyomi.autoHiragana) {
         inputVal = wanakana.toHiragana(inputVal, { IMEMode: true });
@@ -188,9 +199,6 @@
       if (inputVal === 'q') {
         onEnd();
       }
-    }
-    if (gameSettings.backspaceClear && e.key === 'Backspace') {
-      inputVal = '';
     }
   };
 </script>

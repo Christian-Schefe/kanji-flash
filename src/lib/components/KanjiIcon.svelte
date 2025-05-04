@@ -20,7 +20,7 @@
 </script>
 
 <a
-  href="{base}/reference/{literal}"
+  href="{base}/reference/kanji/{literal}"
   style="width: {size - margin}px; height: {size - margin}px; margin: {margin / 2}px;
               font-size: {size / 1.5 - 10}px;"
   class="{fontClass} {hoverBGClass} {hoverTextClass} p-1 outline outline-gray-400 dark:outline-gray-700 rounded-lg text-center {activeOutlineClass}"
