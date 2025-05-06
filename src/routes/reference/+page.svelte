@@ -8,7 +8,6 @@
   import { localStore } from '$lib/localStorage.svelte';
   import { allKanjiCollection, collectionMap } from '$lib/collection.svelte';
   import * as wanakana from 'wanakana';
-  import { settings } from '$lib/settings.svelte';
   import KanjiIcon from '$lib/components/KanjiIcon.svelte';
 
   const { data }: PageProps = $props();
