@@ -24,9 +24,14 @@
 
   const filteredKanjis = $derived.by(() => {
     const filtered = kanjis.filter((kanji) => collection.contains(kanji));
-    return gameSettings.mode === 'onyomi'
-      ? filtered.filter((kanji) => kanji.o.length > 0)
-      : filtered;
+    if (gameSettings.mode === 'onyomi') {
+      const hasOnyomi = filtered.filter((kanji) => kanji.o.length > 0);
+      if (!gameSettings.onyomi.showKanji) {
+        return hasOnyomi.filter((kanji) => kanji.m.length > 0);
+      }
+      return hasOnyomi;
+    }
+    return filtered.filter((kanji) => kanji.m.length > 0);
   });
 
   const currentKanji: Kanji | undefined = $derived(filteredKanjis[gameState.currentIndex]);
@@ -201,6 +206,18 @@
       }
     }
   };
+
+  const showMeaningInQuestion = $derived(
+    gameSettings.mode === 'onyomi' && gameSettings.onyomi.showMeaning
+  );
+
+  const showKanjiInQuestion = $derived(
+    gameSettings.mode !== 'onyomi' || gameSettings.onyomi.showKanji
+  );
+
+  const showOnyomiInQuestion = $derived(
+    gameSettings.mode === 'meaning' && gameSettings.meaning.showOnyomi
+  );
 </script>
 
 <div class="flex flex-col items-center gap-4">
@@ -211,13 +228,16 @@
       <Progressbar progress={(timePlayed * 100) / gameSettings.time} />
       <p>{timeLeftString}</p>
     </div>
-    {#if gameSettings.mode === 'onyomi' && gameSettings.onyomi.showMeaning}
+    {#if showMeaningInQuestion}
       <KanjiMeanings kanji={currentKanji} />
     {/if}
-    {#if gameSettings.mode !== 'onyomi' || gameSettings.onyomi.showKanji}
+    {#if showKanjiInQuestion}
       <p class="text-8xl {fontClass}">
         {currentKanji.l}
       </p>
+    {/if}
+    {#if showOnyomiInQuestion}
+      <p class="text-2xl text-center">On: {currentKanji.o.join(', ')}</p>
     {/if}
     <div class="w-full max-w-48">
       <Input
@@ -231,18 +251,16 @@
     </div>
     <Button onclick={onSkip}>Skip</Button>
     {#if solution}
-      {#if gameSettings.mode === 'onyomi'}
-        {#if !gameSettings.onyomi.showKanji}
-          <p class="text-8xl {fontClass}">
-            {currentKanji.l}
-          </p>
-        {/if}
-        {#if !gameSettings.onyomi.showMeaning}
-          <KanjiMeanings kanji={currentKanji} />
-        {/if}
-        <p class="text-2xl text-center">On: {currentKanji.o.join(', ')}</p>
-      {:else if gameSettings.mode === 'meaning'}
+      {#if !showMeaningInQuestion}
         <KanjiMeanings kanji={currentKanji} />
+      {/if}
+      {#if !showKanjiInQuestion}
+        <p class="text-8xl {fontClass}">
+          {currentKanji.l}
+        </p>
+      {/if}
+      {#if !showOnyomiInQuestion}
+        <p class="text-2xl text-center">On: {currentKanji.o.join(', ')}</p>
       {/if}
     {/if}
   {:else if gameState.done}

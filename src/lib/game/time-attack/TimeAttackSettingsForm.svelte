@@ -33,7 +33,7 @@
   ].map((t) => ({
     value: t,
     name:
-      t / 60 == Math.round(t / 60) ? `${t / 60} minute` + (t / 60 > 1 ? 's' : '') : `${t} seconds`
+      t / 60 === Math.round(t / 60) ? `${t / 60} minute${t / 60 > 1 ? 's' : ''}` : `${t} seconds`
   }));
 
   let collection = $state(gameSettings.collection);
@@ -42,6 +42,7 @@
   let autoHiragana = $state(gameSettings.onyomi.autoHiragana);
   let showMeaning = $state(gameSettings.onyomi.showMeaning);
   let showKanji = $state(!gameSettings.onyomi.showMeaning || gameSettings.onyomi.showKanji);
+  let showOnyomi = $state(gameSettings.meaning.showOnyomi);
   let time = $state(gameSettings.time);
 
   const onOnyomiSettingsChange = (changedKanji: boolean) => {
@@ -64,6 +65,7 @@
     gameSettings.onyomi.autoHiragana = autoHiragana;
     gameSettings.onyomi.showMeaning = showMeaning;
     gameSettings.onyomi.showKanji = showKanji;
+    gameSettings.meaning.showOnyomi = showOnyomi;
 
     stateData.state.gameModeState.timeAttack = defaultTimeAttackState();
   };
@@ -93,6 +95,12 @@
     <div class="flex items-center gap-2">
       <Toggle bind:checked={showKanji} onchange={() => onOnyomiSettingsChange(true)} />
       <Label>Show Kanji</Label>
+    </div>
+  {:else if mode === 'meaning'}
+    <Label>Meaning Mode Settings</Label>
+    <div class="flex items-center gap-2">
+      <Toggle bind:checked={showOnyomi} />
+      <Label>Show Onyomi</Label>
     </div>
   {/if}
 </div>

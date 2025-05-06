@@ -10,6 +10,9 @@ export type TimeAttackSettings = {
     showMeaning: boolean;
     showKanji: boolean;
   };
+  meaning: {
+    showOnyomi: boolean;
+  };
 };
 
 export type TimeAttackState = {
@@ -28,6 +31,9 @@ export const defaultTimeAttackSettings: () => TimeAttackSettings = () => ({
     autoHiragana: false,
     showMeaning: false,
     showKanji: true
+  },
+  meaning: {
+    showOnyomi: false
   },
   time: 60
 });
