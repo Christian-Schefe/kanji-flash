@@ -5,3 +5,4 @@ yarn.lock
 bun.lock
 bun.lockb
 static/kanji.json
+static/kanji_svg.json
