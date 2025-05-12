@@ -1,11 +1,12 @@
 <script lang="ts">
   import PageBody from '$lib/components/PageBody.svelte';
-  import { Card } from 'flowbite-svelte';
+  import { Card, Spinner } from 'flowbite-svelte';
   import type { PageProps } from './$types';
   import { base } from '$app/paths';
   import { settings } from '$lib/settings.svelte';
   import KanjiMeanings from '$lib/components/KanjiMeanings.svelte';
   import { page } from '$app/state';
+  import { getSVG } from '$lib/svgStorage';
 
   const { data }: PageProps = $props();
 
@@ -29,51 +30,28 @@
     ][kanji?.g ?? 0]
   );
 
-  let svgString: string | null = $state(null);
-
-  const processSvg = (svg: string) => {
-    const startIndex = svg.indexOf('<svg');
-    return svg
-      .slice(startIndex)
-      .replace(/<g id="kvg:StrokePaths[^>]+>/g, (match) => {
-        return match.replace('>', "class='stroke-current'>");
-      })
-      .replace(/<g id="kvg:StrokeNumbers[^>]+>/g, (match) => {
-        return match.replace('>', "class='fill-current'>");
-      })
-      .replace(/<g id="kvg:StrokePaths[^>]+>/g, (match) => {
-        return match.replace(/stroke:[^;"]+;*/, '');
-      })
-      .replace(/<g id="kvg:StrokeNumbers[^>]+>/g, (match) => {
-        return match.replace(/fill:[^"]+;*/, '');
-      });
-  };
-
-  const checkSvgExists = async () => {
-    if (!settings.settings.showStrokeOrder) {
-      svgString = null;
-      return;
-    }
-    try {
-      const res = await fetch(svgUrl);
-      svgString = res.ok ? processSvg(await res.text()) : null;
-    } catch {
-      return false;
-    }
-  };
-
   const fontClass = $derived(settings.settings.font);
 
   const kanjiCodepoint = $derived(
     kanji?.l.codePointAt(0)?.toString(16).toLowerCase().padStart(5, '0') ?? '00000'
   );
-  const svgUrl = $derived(
-    `https://raw.githubusercontent.com/KanjiVG/kanjivg/84a317ec30c3c799aa92064bc00a29011b8d14a7/kanji/${kanjiCodepoint}.svg`
-  );
 
-  $effect(() => {
-    checkSvgExists();
-  });
+  const convertSVGData = (data: string | null | undefined) => {
+    if (data === null || data === undefined) {
+      return null;
+    }
+    const [strokePart, textPart] = data.split('|');
+    const strokeParts = strokePart.split('#');
+    const textParts = textPart.split('#');
+    const strokeGroup = `<g class="stroke-current" style="fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;">${strokeParts.map((p) => `<path d="${p}"></path>`)}</g>`;
+    const textGroup = `<g class="fill-current" style="font-size:8px;">${textParts.map((p, i) => `<text transform="${p}">${i + 1}</text>`)}</g>`;
+    return {
+      strokes: strokeGroup,
+      text: textGroup
+    };
+  };
+
+  const svgData = $derived.by(async () => convertSVGData(kanji && (await getSVG(kanji.l))));
 </script>
 
 {#if kanji != null}
@@ -114,14 +92,27 @@
             </div>
           </div>
         </div>
-        {#if svgString !== null}
-          <div class="flex flex-col w-full items-center mt-4">
-            <p class="text-xl font-bold">Stroke Order</p>
-            <svg class="max-w-64" viewBox="0 0 109 109" xmlns="http://www.w3.org/2000/svg">
-              {@html svgString}
-            </svg>
+        <div class="flex flex-col w-full items-center mt-4">
+          <p class="text-xl font-bold">Stroke Order</p>
+          <div class="max-w-64 w-full flex items-center justify-center aspect-square">
+            {#await svgData}
+              <Spinner />
+            {:then data}
+              {#if data !== null}
+                <svg viewBox="0 0 109 109" xmlns="http://www.w3.org/2000/svg">
+                  <g
+                    class="stroke-current"
+                    style="fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;"
+                    >{@html data.strokes}</g
+                  >
+                  <g class="fill-current" style="font-size:8px;">{@html data.text}</g>
+                </svg>
+              {:else}
+                <p class="text-primary-600">No SVG data available</p>
+              {/if}
+            {/await}
           </div>
-        {/if}
+        </div>
       </Card>
     </div>
   </PageBody>

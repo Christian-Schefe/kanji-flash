@@ -48,19 +48,22 @@ def main():
         print(f"Error: {input_directory_path} is not a valid directory.")
         sys.exit(1)
 
-    processed_files = {}
+    processed_files = {
+        "version": "1.0",
+    }
 
     for root, _, files in os.walk(input_directory_path):
         for file_name in files:
             input_file_path = os.path.join(root, file_name)
-            file_name_no_ext = os.path.splitext(file_name)[0]
+            kanji_codepoint = os.path.splitext(file_name)[0]
+            kanji = chr(int(kanji_codepoint, 16))
 
             try:
                 with open(input_file_path, "r", encoding="utf-8") as file:
                     content = file.read()
 
                 transformed_content = transform_file_content(content)
-                processed_files[file_name_no_ext] = transformed_content
+                processed_files[kanji] = transformed_content
 
             except Exception as e:
                 print(f"Failed to process {input_file_path}: {e}")

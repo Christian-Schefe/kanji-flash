@@ -2,7 +2,8 @@
   import { base } from '$app/paths';
   import PageBody from '$lib/components/PageBody.svelte';
   import { resetSettings, settings } from '$lib/settings.svelte';
-  import { Button, Card, DarkMode, Hr, Label, Modal, Select, Toggle } from 'flowbite-svelte';
+  import { clearSVGData, fetchAndStoreSVGs, hasSVGData } from '$lib/svgStorage';
+  import { Button, Card, Hr, Label, Modal, Select, Toggle } from 'flowbite-svelte';
   import { ExclamationCircleOutline } from 'flowbite-svelte-icons';
 
   const fonts = [
@@ -10,10 +11,24 @@
     { value: 'noto-serif-jp', name: 'Noto Serif JP' }
   ];
 
+  const { data } = $props();
+
+  let hasLoaded = $state(false);
+  let hasDeleted = $state(false);
+  const disableButton = $derived((data.hasSVG && !hasDeleted) || hasLoaded);
+
   let popupModal = $state(false);
+
+  const downloadSVGs = async () => {
+    await fetchAndStoreSVGs(`${base}/kanji_svg.json`);
+    hasLoaded = await hasSVGData();
+  };
 
   const onDeleteData = () => {
     resetSettings();
+    clearSVGData();
+    hasLoaded = false;
+    hasDeleted = true;
   };
 </script>
 
@@ -29,6 +44,7 @@
       </div>
     </Card>
     <Hr classHr="w-[50%]" classDiv="sm:col-span-2">Danger Zone</Hr>
+    <Button onclick={downloadSVGs} disabled={disableButton}>Download SVGs</Button>
     <Button onclick={() => (popupModal = true)}>Delete All Data</Button>
     <Modal bind:open={popupModal} size="xs" autoclose>
       <div class="text-center">
