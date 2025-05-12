@@ -6,7 +6,7 @@
   import { settings } from '$lib/settings.svelte';
   import KanjiMeanings from '$lib/components/KanjiMeanings.svelte';
   import { page } from '$app/state';
-  import { getSVG } from '$lib/svgStorage';
+  import { getSVG, noDataSymbol } from '$lib/svgStorage';
 
   const { data }: PageProps = $props();
 
@@ -32,13 +32,9 @@
 
   const fontClass = $derived(settings.settings.font);
 
-  const kanjiCodepoint = $derived(
-    kanji?.l.codePointAt(0)?.toString(16).toLowerCase().padStart(5, '0') ?? '00000'
-  );
-
-  const convertSVGData = (data: string | null | undefined) => {
-    if (data === null || data === undefined) {
-      return null;
+  const convertSVGData = (data: string | null | typeof noDataSymbol) => {
+    if (data === noDataSymbol || data === null) {
+      return data;
     }
     const [strokePart, textPart] = data.split('|');
     const strokeParts = strokePart.split('#');
@@ -51,7 +47,7 @@
     };
   };
 
-  const svgData = $derived.by(async () => convertSVGData(kanji && (await getSVG(kanji.l))));
+  const svgData = $derived.by(async () => convertSVGData(kanji ? await getSVG(kanji.l) : null));
 </script>
 
 {#if kanji != null}
@@ -96,9 +92,13 @@
           <p class="text-xl font-bold">Stroke Order</p>
           <div class="max-w-64 w-full flex items-center justify-center aspect-square">
             {#await svgData}
-              <Spinner />
+              <Spinner size="16" />
             {:then data}
-              {#if data !== null}
+              {#if data === noDataSymbol}
+                <p class="text-primary-600 text-center">SVG data has not been downloaded</p>
+              {:else if data === null}
+                <p class="text-primary-600 text-center">No SVG found for kanji</p>
+              {:else}
                 <svg viewBox="0 0 109 109" xmlns="http://www.w3.org/2000/svg">
                   <g
                     class="stroke-current"
@@ -107,8 +107,6 @@
                   >
                   <g class="fill-current" style="font-size:8px;">{@html data.text}</g>
                 </svg>
-              {:else}
-                <p class="text-primary-600">No SVG data available</p>
               {/if}
             {/await}
           </div>
