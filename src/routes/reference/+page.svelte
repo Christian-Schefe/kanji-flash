@@ -14,7 +14,7 @@
   const { kanjis } = data;
 
   let divWidth = $state(-1);
-  let pageIndexStore = localStore('page', 1, 'read');
+  const pageIndexStore = localStore('page', 1, 'read');
   const pageIndex = $derived(pageIndexStore.value - 1);
 
   const elementSize = 52;
@@ -26,7 +26,7 @@
   const searchTerm = localStore('searchTerm', '', 'read');
   const sortBy = localStore('sortBy', 'literal', 'sync');
   const reverse = localStore('reverse', false, 'sync');
-  const gradeFilter = localStore('gradeFilter', 'jinmeiyou', 'sync');
+  const gradeFilter = localStore('gradeFilter', 'all', 'sync');
   const excludeLowerGrade = localStore('excludeLowerGrade', false, 'sync');
   const collection = localStore('collection', allKanjiCollection.id, 'sync');
   const elementsPerPage = localStore('elementsPerPage', 100, 'sync');
