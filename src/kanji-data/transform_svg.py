@@ -24,7 +24,11 @@ def transform_file_content(content: str) -> str:
     for text in texts:
         t = text.attrib.get("transform")
         if t is not None:
-            transforms.append(t)
+            if t.startswith("matrix(") and t.endswith(")"):
+                t = t[7:-1]
+                transforms.append(t)
+            else:
+                print("Error: Transform does not start with 'matrix(' or end with ')'.")
         else:
             print("Error: Text element does not have a 'transform' attribute.")
 

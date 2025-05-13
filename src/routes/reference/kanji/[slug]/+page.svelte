@@ -40,7 +40,7 @@
     const strokeParts = strokePart.split('#');
     const textParts = textPart.split('#');
     const strokeGroup = `<g class="stroke-current" style="fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;">${strokeParts.map((p) => `<path d="${p}"></path>`)}</g>`;
-    const textGroup = `<g class="fill-current" style="font-size:8px;">${textParts.map((p, i) => `<text transform="${p}">${i + 1}</text>`)}</g>`;
+    const textGroup = `<g class="fill-current" style="font-size:8px;">${textParts.map((p, i) => `<text transform="matrix(${p})">${i + 1}</text>`)}</g>`;
     return {
       strokes: strokeGroup,
       text: textGroup
