@@ -5,39 +5,57 @@
   import { clearSVGData, fetchAndStoreSVGs, hasSVGData } from '$lib/svgStorage';
   import { Button, Card, Hr, Label, Modal, Select, Spinner, Toggle } from 'flowbite-svelte';
   import { ExclamationCircleOutline } from 'flowbite-svelte-icons';
+  import { onMount } from 'svelte';
 
   const fonts = [
     { value: 'noto-sans-jp', name: 'Noto Sans JP' },
     { value: 'noto-serif-jp', name: 'Noto Serif JP' }
   ];
 
-  const { data } = $props();
+  let hasData = $state(false);
+  let isInitialLoading = $state(true);
 
-  let isLoading = $state(false);
+  let isDownloading: 'no' | 'downloading' | 'storing' = $state('no');
   let isDeleting = $state(false);
-  let hasLoaded = $state(false);
-  let hasDeleted = $state(false);
+
+  const modals = $state({
+    deleteConfirm: false,
+    downloading: false,
+    deleting: false
+  });
+
   const disableButton = $derived(
-    (data.hasSVG && !hasDeleted) || hasLoaded || isDeleting || isLoading
+    hasData || isDeleting || isDownloading !== 'no' || isInitialLoading
   );
 
-  let popupModal = $state(false);
+  const checkSVGData = async () => {
+    hasData = await hasSVGData();
+    isInitialLoading = false;
+  };
 
   const downloadSVGs = async () => {
-    isLoading = true;
+    modals.downloading = true;
+    isDownloading = 'downloading';
     await fetchAndStoreSVGs(`${base}/kanji_svg.json`);
-    hasLoaded = await hasSVGData();
-    isLoading = false;
+    isDownloading = 'storing';
+    await checkSVGData();
+    isDownloading = 'no';
+    modals.downloading = false;
   };
 
   const onDeleteData = async () => {
+    modals.deleting = true;
     isDeleting = true;
     resetSettings();
     await clearSVGData();
-    hasLoaded = false;
-    hasDeleted = true;
+    await checkSVGData();
     isDeleting = false;
+    modals.deleting = false;
   };
+
+  onMount(() => {
+    checkSVGData();
+  });
 </script>
 
 <PageBody title="Settings" backHref="{base}/">
@@ -53,20 +71,19 @@
     </Card>
     <Hr classHr="w-[50%]" classDiv="sm:col-span-2">Data</Hr>
     <Button class="min-w-40" onclick={downloadSVGs} disabled={disableButton}>Download SVGs</Button>
-    <Modal bind:open={isLoading} size="xs" dismissable={false}>
+    <Modal bind:open={modals.downloading} size="xs" dismissable={false}>
       <div class="text-center">
         <Spinner class="mx-auto mb-4" />
         <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
-          Downloading SVGs...
+          {#if isDownloading === 'downloading'}Downloading SVGs...{:else if isDownloading === 'storing'}Storing
+            SVGs...{/if}
         </h3>
-        <p class="text-sm text-gray-500 dark:text-gray-400">
-          This may take a while depending on your internet connection.
-        </p>
+        <p class="text-sm text-gray-500 dark:text-gray-400">This may take a while.</p>
       </div>
     </Modal>
     <Hr classHr="w-[50%]" classDiv="sm:col-span-2">Danger Zone</Hr>
-    <Button class="min-w-40" onclick={() => (popupModal = true)}>Delete All Data</Button>
-    <Modal bind:open={popupModal} size="xs" autoclose>
+    <Button class="min-w-40" onclick={() => (modals.deleteConfirm = true)}>Delete All Data</Button>
+    <Modal bind:open={modals.deleteConfirm} size="xs" autoclose>
       <div class="text-center">
         <ExclamationCircleOutline class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200" />
         <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
@@ -76,7 +93,7 @@
         <Button color="alternative">Cancel</Button>
       </div>
     </Modal>
-    <Modal bind:open={isDeleting} size="xs" dismissable={false}>
+    <Modal bind:open={modals.deleting} size="xs" dismissable={false}>
       <div class="text-center">
         <Spinner class="mx-auto mb-4" />
         <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Deleting data...</h3>
