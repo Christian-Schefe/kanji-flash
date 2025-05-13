@@ -23,7 +23,6 @@ interface MyDB extends DBSchema {
 }
 
 async function upgradeDB(db: IDBPDatabase<MyDB>) {
-  console.log('Upgrading IndexedDB');
   if (!db.objectStoreNames.contains('svg')) {
     db.createObjectStore('svg');
   }
@@ -66,8 +65,6 @@ export async function fetchAndStoreSVGs(url: string): Promise<void> {
 
     // Store the version
     await db.put('meta', jsonData.version, 'version');
-
-    console.log('JSON data successfully stored in IndexedDB');
   } catch (error) {
     console.error('Error fetching or storing JSON:', error);
   }

@@ -14,9 +14,12 @@
   const { data } = $props();
 
   let isLoading = $state(false);
+  let isDeleting = $state(false);
   let hasLoaded = $state(false);
   let hasDeleted = $state(false);
-  const disableButton = $derived((data.hasSVG && !hasDeleted) || hasLoaded || isLoading);
+  const disableButton = $derived(
+    (data.hasSVG && !hasDeleted) || hasLoaded || isDeleting || isLoading
+  );
 
   let popupModal = $state(false);
 
@@ -28,10 +31,12 @@
   };
 
   const onDeleteData = async () => {
+    isDeleting = true;
     resetSettings();
     await clearSVGData();
     hasLoaded = false;
     hasDeleted = true;
+    isDeleting = false;
   };
 </script>
 
@@ -69,6 +74,13 @@
         </h3>
         <Button color="red" class="me-2" onclick={onDeleteData}>Confirm</Button>
         <Button color="alternative">Cancel</Button>
+      </div>
+    </Modal>
+    <Modal bind:open={isDeleting} size="xs" dismissable={false}>
+      <div class="text-center">
+        <Spinner class="mx-auto mb-4" />
+        <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Deleting data...</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400">This may take a while.</p>
       </div>
     </Modal>
   </div>
