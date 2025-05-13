@@ -52,11 +52,22 @@ def main():
         "version": "1.0",
     }
 
+    valid_kanjis = set()
+
+    with open("../../static/kanji.json", "r", encoding="utf-8") as kanji_file:
+        kanji_data = json.load(kanji_file)
+        for kanji in kanji_data:
+            if "l" in kanji:
+                valid_kanjis.add(kanji["l"])
+
     for root, _, files in os.walk(input_directory_path):
         for file_name in files:
             input_file_path = os.path.join(root, file_name)
             kanji_codepoint = os.path.splitext(file_name)[0]
             kanji = chr(int(kanji_codepoint, 16))
+            if kanji not in valid_kanjis:
+                print(f"Skipping {input_file_path}: Kanji {kanji} is not in the valid list.")
+                continue
 
             try:
                 with open(input_file_path, "r", encoding="utf-8") as file:

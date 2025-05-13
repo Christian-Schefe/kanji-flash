@@ -3,7 +3,7 @@
   import PageBody from '$lib/components/PageBody.svelte';
   import { resetSettings, settings } from '$lib/settings.svelte';
   import { clearSVGData, fetchAndStoreSVGs, hasSVGData } from '$lib/svgStorage';
-  import { Button, Card, Hr, Label, Modal, Select, Toggle } from 'flowbite-svelte';
+  import { Button, Card, Hr, Label, Modal, Select, Spinner, Toggle } from 'flowbite-svelte';
   import { ExclamationCircleOutline } from 'flowbite-svelte-icons';
 
   const fonts = [
@@ -13,20 +13,23 @@
 
   const { data } = $props();
 
+  let isLoading = $state(false);
   let hasLoaded = $state(false);
   let hasDeleted = $state(false);
-  const disableButton = $derived((data.hasSVG && !hasDeleted) || hasLoaded);
+  const disableButton = $derived((data.hasSVG && !hasDeleted) || hasLoaded || isLoading);
 
   let popupModal = $state(false);
 
   const downloadSVGs = async () => {
+    isLoading = true;
     await fetchAndStoreSVGs(`${base}/kanji_svg.json`);
     hasLoaded = await hasSVGData();
+    isLoading = false;
   };
 
-  const onDeleteData = () => {
+  const onDeleteData = async () => {
     resetSettings();
-    clearSVGData();
+    await clearSVGData();
     hasLoaded = false;
     hasDeleted = true;
   };
@@ -43,9 +46,21 @@
         <Label>Show Stroke Order SVGs</Label>
       </div>
     </Card>
+    <Hr classHr="w-[50%]" classDiv="sm:col-span-2">Data</Hr>
+    <Button class="min-w-40" onclick={downloadSVGs} disabled={disableButton}>Download SVGs</Button>
+    <Modal bind:open={isLoading} size="xs" dismissable={false}>
+      <div class="text-center">
+        <Spinner class="mx-auto mb-4" />
+        <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+          Downloading SVGs...
+        </h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          This may take a while depending on your internet connection.
+        </p>
+      </div>
+    </Modal>
     <Hr classHr="w-[50%]" classDiv="sm:col-span-2">Danger Zone</Hr>
-    <Button onclick={downloadSVGs} disabled={disableButton}>Download SVGs</Button>
-    <Button onclick={() => (popupModal = true)}>Delete All Data</Button>
+    <Button class="min-w-40" onclick={() => (popupModal = true)}>Delete All Data</Button>
     <Modal bind:open={popupModal} size="xs" autoclose>
       <div class="text-center">
         <ExclamationCircleOutline class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200" />
