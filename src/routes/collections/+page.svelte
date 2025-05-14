@@ -18,7 +18,7 @@
       {#each collections as collection}
         <Card
           class="h-full"
-          href="{base}/reference/?collection={collection.id}&searchTerm=&sortBy=literal&reverse=false&gradeFilter=all&excludeLowerGrade=false&page=1"
+          href="{base}/reference/?collection={collection.id}&searchTerm=&sortBy=default&reverse=false&gradeFilter=all&excludeLowerGrade=false&page=1"
         >
           <h1 class="font-bold text-xl mb-2">{collection.name}</h1>
           <p>{collection.description}</p>

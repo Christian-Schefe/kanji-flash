@@ -6,14 +6,20 @@
   import { base } from '$app/paths';
   import { beforeNavigate, goto } from '$app/navigation';
   import { localStore } from '$lib/localStorage.svelte';
-  import { allKanjiCollection, collectionMap } from '$lib/collection.svelte';
+  import {
+    allKanjiCollection,
+    collectionMap,
+    sortFns,
+    type SortOption
+  } from '$lib/collection.svelte';
   import * as wanakana from 'wanakana';
   import KanjiIcon from '$lib/components/KanjiIcon.svelte';
+  import type { Kanji } from '../../kanji-data/types';
 
   const { data }: PageProps = $props();
   const { kanjis } = data;
 
-  // biome-ignore lint/style/useConst: <explanation>
+  // biome-ignore lint/style/useConst: state needs to use let
   let divWidth = $state(-1);
   const pageIndexStore = localStore('page', 1, 'read');
   const pageIndex = $derived(pageIndexStore.value - 1);
@@ -25,7 +31,7 @@
   const gridWidth = $derived(columns * elementSize);
 
   const searchTerm = localStore('searchTerm', '', 'read');
-  const sortBy = localStore('sortBy', 'literal', 'sync');
+  const sortBy = localStore<SortOption>('sortBy', 'default', 'sync');
   const reverse = localStore('reverse', false, 'sync');
   const gradeFilter = localStore('gradeFilter', 'all', 'sync');
   const excludeLowerGrade = localStore('excludeLowerGrade', false, 'sync');
@@ -69,34 +75,18 @@
     ['all', (i) => i == null || i < 1 || i > 10]
   ]);
 
+  const collectionObj = $derived(collectionMap.get(collection.value));
+
   const gradeFilterFunc = $derived(
     (excludeLowerGrade.value ? exclusiveGradeMap : gradeMap).get(gradeFilter.value) || (() => true)
   );
 
-  const sortedKanjis = $derived(
-    kanjis.toSorted((x, y) => {
-      const a = reverse.value ? y : x;
-      const b = reverse.value ? x : y;
-      const inf = Number.POSITIVE_INFINITY;
-      const tiebreaker = a.l.localeCompare(b.l);
-      switch (sortBy.value) {
-        case 'literal':
-          return tiebreaker;
-        case 'frequency':
-          return (a.f ?? inf) - (b.f ?? inf) || tiebreaker;
-        case 'grade':
-          return (a.g ?? inf) - (b.g ?? inf) || tiebreaker;
-        case 'jlpt':
-          return (b.j ?? 0) - (a.j ?? 0) || tiebreaker;
-        case 'strokes':
-          return (a.s ?? 0) - (b.s ?? 0) || tiebreaker;
-        default:
-          return tiebreaker;
-      }
-    })
-  );
+  const finalSortFns = {
+    ...sortFns,
+    default: (a: Kanji, b: Kanji) => collectionObj?.intrinsicOrder(a, b) ?? 0
+  };
 
-  const collectionFilter = $derived(collectionMap.get(collection.value)?.contains || (() => true));
+  const collectionFilter = $derived(collectionObj?.contains || (() => true));
 
   const stringFilter = $derived((str: string, searchKana: boolean) =>
     isRegex
@@ -105,7 +95,7 @@
   );
 
   const filteredKanjis = $derived.by(() => {
-    return sortedKanjis.filter((kanji) => {
+    return kanjis.filter((kanji) => {
       return (
         collectionFilter(kanji) &&
         gradeFilterFunc(kanji.g) &&
@@ -122,11 +112,19 @@
     });
   });
 
-  const pageKanjis = $derived(
-    filteredKanjis.slice(elementsPerPage.value * pageIndex, elementsPerPage.value * (pageIndex + 1))
+  const sortedKanjis = $derived(
+    filteredKanjis.toSorted((x, y) => {
+      const a = reverse.value ? y : x;
+      const b = reverse.value ? x : y;
+      return finalSortFns[sortBy.value](a, b) || a.l.localeCompare(b.l);
+    })
   );
 
-  const pageCount = $derived(Math.ceil(filteredKanjis.length / elementsPerPage.value));
+  const pageKanjis = $derived(
+    sortedKanjis.slice(elementsPerPage.value * pageIndex, elementsPerPage.value * (pageIndex + 1))
+  );
+
+  const pageCount = $derived(Math.ceil(sortedKanjis.length / elementsPerPage.value));
   const pageIndices = $derived.by(() => {
     const arr = [pageIndex - 2, pageIndex - 1, pageIndex, pageIndex + 1, pageIndex + 2];
     const offset =
@@ -206,7 +204,7 @@
       on:next={() => setPage(pageIndex + 1)}
     />
   </div>
-  <p class="text-center text-gray-500 text-sm my-2">{filteredKanjis.length} Results</p>
+  <p class="text-center text-gray-500 text-sm my-2">{sortedKanjis.length} Results</p>
   <div class="w-full flex justify-center" bind:clientWidth={divWidth}>
     {#if divWidth === -1}
       <p>Loading...</p>

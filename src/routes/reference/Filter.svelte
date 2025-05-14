@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { collections } from '$lib/collection.svelte';
+  import { collections, type SortOption } from '$lib/collection.svelte';
   import {
     Button,
     Checkbox,
@@ -17,7 +17,7 @@
     searchTerm: string;
     gradeFilter: string;
     excludeLowerGrade: boolean;
-    sortBy: string;
+    sortBy: SortOption;
     reverse: boolean;
     elementsPerPage: number;
     collection: string;
@@ -50,12 +50,14 @@
     { value: 'all', name: 'All' }
   ];
 
-  const ordering = [
+  const ordering: { value: SortOption; name: string }[] = [
+    { value: 'default', name: 'Default' },
     { value: 'literal', name: 'Literal' },
     { value: 'frequency', name: 'Frequency' },
     { value: 'grade', name: 'Grade' },
     { value: 'jlpt', name: 'JLPT' },
-    { value: 'strokes', name: 'Strokes' }
+    { value: 'strokes', name: 'Strokes' },
+    { value: 'rtk', name: 'RTK' }
   ];
 
   const pagingOptions = [50, 100, 200, 500, 1000].map((i) => ({
