@@ -28,6 +28,7 @@
     reset: () => void;
   };
 
+  // biome-ignore lint/style/useConst: bindable needs to use let
   let {
     searchTerm = $bindable(),
     gradeFilter = $bindable(),

@@ -13,6 +13,7 @@
   const { data }: PageProps = $props();
   const { kanjis } = data;
 
+  // biome-ignore lint/style/useConst: <explanation>
   let divWidth = $state(-1);
   const pageIndexStore = localStore('page', 1, 'read');
   const pageIndex = $derived(pageIndexStore.value - 1);

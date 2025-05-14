@@ -23,6 +23,15 @@ export const properKanjiCollection: KanjiCollection = {
   }
 };
 
+export const rtkKanjiCollection: KanjiCollection = {
+  id: 'rtk_kanji',
+  name: 'RTK Kanji',
+  description: 'The kanji from the RTK book.',
+  contains: (kanji: Kanji) => {
+    return kanji.r !== null;
+  }
+};
+
 export const kyouikuKanjiCollection: KanjiCollection = {
   id: 'kyouiku_kanji',
   name: 'Kyouiku Kanji',
@@ -72,7 +81,7 @@ export const jlptCollections = [
   jlptCollection(1, 'N1')
 ];
 
-export const otherCollections = [allKanjiCollection, properKanjiCollection];
+export const otherCollections = [allKanjiCollection, properKanjiCollection, rtkKanjiCollection];
 
 export const collections: KanjiCollection[] = [
   ...otherCollections,

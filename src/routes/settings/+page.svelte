@@ -2,7 +2,7 @@
   import { base } from '$app/paths';
   import PageBody from '$lib/components/PageBody.svelte';
   import { resetSettings, settings } from '$lib/settings.svelte';
-  import { clearSVGData, fetchAndStoreSVGs, hasSVGData } from '$lib/svgStorage';
+  import { clearSVGData, hasSVGData, storeSVGData, type SVGData } from '$lib/svgStorage';
   import { Button, Card, Hr, Label, Modal, Select, Spinner, Toggle } from 'flowbite-svelte';
   import { ExclamationCircleOutline } from 'flowbite-svelte-icons';
   import { onMount } from 'svelte';
@@ -36,8 +36,14 @@
   const downloadSVGs = async () => {
     modals.downloading = true;
     isDownloading = 'downloading';
-    await fetchAndStoreSVGs(`${base}/kanji_svg.json`);
+    const url = `${base}/kanji_svg.json`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch JSON from ${url}: ${response.statusText}`);
+    }
+    const jsonData: SVGData = await response.json();
     isDownloading = 'storing';
+    await storeSVGData(jsonData);
     await checkSVGData();
     isDownloading = 'no';
     modals.downloading = false;

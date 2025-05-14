@@ -1,6 +1,6 @@
 import { deleteDB, openDB, type DBSchema, type IDBPDatabase } from 'idb';
 
-interface JsonData {
+export interface SVGData {
   version: string;
   [key: string]: string;
 }
@@ -40,30 +40,29 @@ async function openMyDB() {
   return db;
 }
 
-export async function fetchAndStoreSVGs(url: string): Promise<void> {
+export async function storeSVGData(jsonData: SVGData): Promise<void> {
   try {
-    // Fetch the JSON file
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch JSON from ${url}: ${response.statusText}`);
-    }
-    const jsonData: JsonData = await response.json();
-
-    // Open IndexedDB
     const db = await openMyDB();
 
-    // Store the JSON data
-    const tx = db.transaction('svg', 'readwrite');
-    const store = tx.objectStore('svg');
+    const batchSize = 100;
+    const keys = Object.keys(jsonData).filter((key) => key !== 'version');
+    const totalKeys = keys.length;
+    let currentIndex = 0;
+    while (currentIndex < totalKeys) {
+      const batchKeys = keys.slice(currentIndex, currentIndex + batchSize);
+      currentIndex += batchSize;
 
-    for (const [key, value] of Object.entries(jsonData)) {
-      if (key === 'version') continue;
-      await store.put(value, key);
+      const tx = db.transaction('svg', 'readwrite');
+      const store = tx.objectStore('svg');
+
+      for (const key of batchKeys) {
+        if (key === 'version') continue;
+        await store.put(jsonData[key], key);
+      }
+
+      await tx.done;
     }
 
-    await tx.done;
-
-    // Store the version
     await db.put('meta', jsonData.version, 'version');
   } catch (error) {
     console.error('Error fetching or storing JSON:', error);
