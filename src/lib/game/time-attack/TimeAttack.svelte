@@ -23,7 +23,7 @@
   const collection = $derived(collectionMap.get(gameSettings.collection) ?? allKanjiCollection);
 
   const filteredKanjis = $derived.by(() => {
-    const filtered = kanjis.filter((kanji) => collection.contains(kanji));
+    const filtered = kanjis.filter((kanji) => collection.contains(kanjis, kanji));
     if (gameSettings.mode === 'onyomi') {
       const hasOnyomi = filtered.filter((kanji) => kanji.o.length > 0);
       if (!gameSettings.onyomi.showKanji) {

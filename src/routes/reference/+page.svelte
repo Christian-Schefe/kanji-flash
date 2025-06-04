@@ -97,7 +97,7 @@
   const filteredKanjis = $derived.by(() => {
     return kanjis.filter((kanji) => {
       return (
-        collectionFilter(kanji) &&
+        collectionFilter(kanjis, kanji) &&
         gradeFilterFunc(kanji.g) &&
         (searchTerm.value.length === 0 ||
           stringFilter(kanji.l, false) ||

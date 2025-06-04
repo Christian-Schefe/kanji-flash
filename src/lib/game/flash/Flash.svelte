@@ -15,7 +15,7 @@
   const collection = $derived(collectionMap.get(gameSettings.collection) ?? allKanjiCollection);
 
   const filteredKanjis = $derived.by(() => {
-    const collectionKanji = kanjis.filter((kanji) => collection.contains(kanji));
+    const collectionKanji = kanjis.filter((kanji) => collection.contains(kanjis, kanji));
     return gameSettings.review
       ? collectionKanji.filter((kanji) => stateData.state.badKanjis[kanji.l] !== undefined)
       : collectionKanji;

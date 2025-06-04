@@ -1,10 +1,11 @@
 import type { Kanji } from '../kanji-data/types';
+import { getKanjisOfTheDay } from './kanjiOfTheDay';
 
 export interface KanjiCollection {
   id: string;
   name: string;
   description: string;
-  contains: (kanji: Kanji) => boolean;
+  contains: (kanjis: Kanji[], kanji: Kanji) => boolean;
   intrinsicOrder: (a: Kanji, b: Kanji) => number;
 }
 
@@ -40,7 +41,7 @@ export const properKanjiCollection: KanjiCollection = {
   id: 'proper_kanji',
   name: 'Proper Kanji',
   description: 'All kanji in the database that have an assigned meaning and at least one reading.',
-  contains: (kanji: Kanji) => {
+  contains: (_, kanji: Kanji) => {
     return kanji.m.length > 0 && (kanji.k.length > 0 || kanji.o.length > 0);
   },
   intrinsicOrder: noOrder
@@ -50,7 +51,7 @@ export const rtkKanjiCollection: KanjiCollection = {
   id: 'rtk_kanji',
   name: 'RTK Kanji',
   description: 'The kanji from the RTK book.',
-  contains: (kanji: Kanji) => {
+  contains: (_, kanji: Kanji) => {
     return kanji.r !== null;
   },
   intrinsicOrder: orderByRTKIndex
@@ -60,7 +61,7 @@ export const kyouikuKanjiCollection: KanjiCollection = {
   id: 'kyouiku_kanji',
   name: 'Kyouiku Kanji',
   description: 'The 1026 kyouiku kanji.',
-  contains: (kanji: Kanji) => {
+  contains: (_, kanji: Kanji) => {
     return kanji.g !== null && kanji.g > 0 && kanji.g <= 6;
   },
   intrinsicOrder: orderByGrade
@@ -70,7 +71,7 @@ export const jouyouKanjiCollection: KanjiCollection = {
   id: 'jouyou_kanji',
   name: 'Jouyou Kanji',
   description: 'The 2136 kyouiku and jouyou kanji.',
-  contains: (kanji: Kanji) => {
+  contains: (_, kanji: Kanji) => {
     return kanji.g !== null && kanji.g <= 8;
   },
   intrinsicOrder: orderByGrade
@@ -80,7 +81,7 @@ export const jinmeiyouKanjiCollection: KanjiCollection = {
   id: 'jinmeiyou_kanji',
   name: 'Jinmeiyou Kanji',
   description: 'The 2999 kyouiku, jouyou and jinmeiyou kanji.',
-  contains: (kanji: Kanji) => {
+  contains: (_, kanji: Kanji) => {
     return kanji.g !== null && kanji.g <= 10;
   },
   intrinsicOrder: orderByGrade
@@ -90,11 +91,22 @@ const jlptCollection = (grade: number, name: string, id?: string) => ({
   id: `jlpt_${id ?? name}`,
   name: `JLPT ${name}`,
   description: `The kanji from the JLPT ${name} level.`,
-  contains: (kanji: Kanji) => {
+  contains: (_: Kanji[], kanji: Kanji) => {
     return kanji.j !== null && kanji.j >= grade;
   },
   intrinsicOrder: orderByGrade
 });
+
+const kanjiOfTheDayCollection: KanjiCollection = {
+  id: 'kanji_of_the_day',
+  name: 'Kanji of the Day',
+  description: 'The kanji of the day.',
+  contains: (kanjis: Kanji[], kanji: Kanji) => {
+    const kanjiOfTheDay = getKanjisOfTheDay(kanjis);
+    return kanjiOfTheDay.kanjis.some((k) => k === kanji.l);
+  },
+  intrinsicOrder: noOrder
+};
 
 export const gradeCollections = [
   kyouikuKanjiCollection,
@@ -109,7 +121,12 @@ export const jlptCollections = [
   jlptCollection(1, 'N1')
 ];
 
-export const otherCollections = [allKanjiCollection, properKanjiCollection, rtkKanjiCollection];
+export const otherCollections = [
+  allKanjiCollection,
+  properKanjiCollection,
+  rtkKanjiCollection,
+  kanjiOfTheDayCollection
+];
 
 export const collections: KanjiCollection[] = [
   ...otherCollections,
