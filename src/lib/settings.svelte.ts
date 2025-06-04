@@ -29,9 +29,6 @@ type Settings = {
 
 type State = {
   state: {
-    badKanjis: {
-      [kanji: string]: number;
-    };
     gameMode: GameMode;
     gameModeState: {
       none: null;

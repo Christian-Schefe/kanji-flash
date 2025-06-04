@@ -12,16 +12,17 @@
   const { kanjis }: Props = $props();
 
   const gameSettings = $derived(settings.settings.gameModeSettings.flash);
+  const gameState = $derived(stateData.state.gameModeState.flash.game);
+  const persistentGameState = $derived(stateData.state.gameModeState.flash.persistent);
   const collection = $derived(collectionMap.get(gameSettings.collection) ?? allKanjiCollection);
 
   const filteredKanjis = $derived.by(() => {
     const collectionKanji = kanjis.filter((kanji) => collection.contains(kanjis, kanji));
     return gameSettings.review
-      ? collectionKanji.filter((kanji) => stateData.state.badKanjis[kanji.l] !== undefined)
+      ? collectionKanji.filter((kanji) => persistentGameState.badKanjis[kanji.l] !== undefined)
       : collectionKanji;
   });
 
-  const gameState = stateData.state.gameModeState.flash;
   const currentKanji: Kanji | undefined = $derived(filteredKanjis[gameState.currentIndex]);
 
   const onReveal = () => {
@@ -30,16 +31,16 @@
 
   const onNext = (isBad: boolean) => {
     if (isBad && currentKanji) {
-      if (stateData.state.badKanjis[currentKanji.l] !== undefined) {
-        stateData.state.badKanjis[currentKanji.l] -= 1;
+      if (persistentGameState.badKanjis[currentKanji.l] !== undefined) {
+        persistentGameState.badKanjis[currentKanji.l] -= 1;
       } else {
-        stateData.state.badKanjis[currentKanji.l] = -2;
+        persistentGameState.badKanjis[currentKanji.l] = -2;
       }
     } else if (currentKanji) {
-      if (stateData.state.badKanjis[currentKanji.l] !== undefined) {
-        stateData.state.badKanjis[currentKanji.l] += 1;
-        if (stateData.state.badKanjis[currentKanji.l] >= 0) {
-          delete stateData.state.badKanjis[currentKanji.l];
+      if (persistentGameState.badKanjis[currentKanji.l] !== undefined) {
+        persistentGameState.badKanjis[currentKanji.l] += 1;
+        if (persistentGameState.badKanjis[currentKanji.l] >= 0) {
+          delete persistentGameState.badKanjis[currentKanji.l];
         }
       }
     }

@@ -7,8 +7,15 @@ export type FlashSettings = {
 };
 
 export type FlashState = {
-  currentIndex: number;
-  currentFace: 'kanji' | 'meaning' | 'info';
+  game: {
+    currentIndex: number;
+    currentFace: 'kanji' | 'meaning' | 'info';
+  };
+  persistent: {
+    badKanjis: {
+      [kanji: string]: number;
+    };
+  };
 };
 
 export const defaultFlashSettings: () => FlashSettings = () => ({
@@ -18,6 +25,11 @@ export const defaultFlashSettings: () => FlashSettings = () => ({
 });
 
 export const defaultFlashState: () => FlashState = () => ({
-  currentIndex: -1,
-  currentFace: 'kanji'
+  game: {
+    currentIndex: -1,
+    currentFace: 'kanji'
+  },
+  persistent: {
+    badKanjis: {}
+  }
 });

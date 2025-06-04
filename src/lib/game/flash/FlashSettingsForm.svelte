@@ -30,7 +30,7 @@
     settings.settings.gameModeSettings.flash.mode = mode;
     settings.settings.gameModeSettings.flash.review = isReview;
 
-    stateData.state.gameModeState.flash = defaultFlashState();
+    stateData.state.gameModeState.flash.game = defaultFlashState().game;
   };
 </script>
 
