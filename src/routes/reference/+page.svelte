@@ -196,6 +196,7 @@
       searchKun.reset();
       searchOn.reset();
       pageIndexStore.reset();
+      searchTerm.syncURL();
     }}
   />
   <div class="flex justify-center mt-4 items-center gap-4">

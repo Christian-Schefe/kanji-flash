@@ -58,6 +58,7 @@ export class LocalStore<T> {
     return JSON.stringify(value);
   }
 
+  //TODO: can only sync one value at a time
   syncURL() {
     if (this.checkQuery !== 'none') {
       const prev = page.url.searchParams.get(this.key);
